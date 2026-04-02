@@ -16,6 +16,7 @@ PKG_LICENSE:=GPL-3.0-or-later
 PKG_LICENSE_FILES:=LICENSE
 PKG_BUILD_PARALLEL:=1
 PKG_BUILD_DEPENDS:=boinc
+BOINC_API_VERSION:=$(shell awk '/^#define BOINC_MAJOR_VERSION/ {maj=$$3} /^#define BOINC_MINOR_VERSION/ {min=$$3} /^#define BOINC_RELEASE/ {rel=$$3} END { if (maj != "" && min != "" && rel != "") printf "%s.%s.%s", maj, min, rel; else printf "7.21.0" }' $(STAGING_DIR)/usr/include/boinc/version.h 2>/dev/null)
 
 include $(INCLUDE_DIR)/package.mk
 
@@ -30,11 +31,6 @@ endef
 define Package/period-search/description
   Builds the ARM64 OpenWrt Period Search executable from Asteroids@home
 	dev branch snapshot and installs files for anonymous-platform usage in BOINC.
-endef
-
-define Build/Prepare
-	$(call Build/Prepare/Default)
-	python3 -c 'from pathlib import Path; p = Path("$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/gauss_errc_asimd.cpp"); s = p.read_text(); start = s.find("#if defined __GNUG__ && !defined __clang__\n"); end = s.find("#endif\n", start); p.write_text(s if start == -1 or end == -1 else s[:start] + s[end + len("#endif\n"):])'
 endef
 
 define Build/Configure
@@ -85,9 +81,11 @@ define Build/Compile
 endef
 
 define Package/period-search/install
-	$(INSTALL_DIR) $(1)/usr/share/boinc/custom-apps/period-search
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/build/period_search_openwrt_aarch64 $(1)/usr/share/boinc/custom-apps/period-search/
-	$(INSTALL_DATA) ./files/app_info.xml $(1)/usr/share/boinc/custom-apps/period-search/
+	$(INSTALL_DIR) $(1)/opt/boinc/projects/asteroidsathome.net_boinc
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/build/period_search_openwrt_aarch64 $(1)/opt/boinc/projects/asteroidsathome.net_boinc/
+	$(CP) ./files/app_info.xml $(PKG_BUILD_DIR)/app_info.xml
+	$(SED) 's|@BOINC_API_VERSION@|$(BOINC_API_VERSION)|g' $(PKG_BUILD_DIR)/app_info.xml
+	$(INSTALL_DATA) $(PKG_BUILD_DIR)/app_info.xml $(1)/opt/boinc/projects/asteroidsathome.net_boinc/
 endef
 
 $(eval $(call BuildPackage,period-search))
