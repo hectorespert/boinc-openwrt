@@ -29,7 +29,7 @@ define Package/period-search
 endef
 
 define Package/period-search/description
-  Builds the ARM64 OpenWrt Period Search executable from Asteroids@home
+	Builds the OpenWrt Period Search executable from Asteroids@home
 	dev branch snapshot and installs files for anonymous-platform usage in BOINC.
 endef
 
@@ -38,6 +38,49 @@ endef
 
 define Build/Compile
 	$(INSTALL_DIR) $(PKG_BUILD_DIR)/build
+	$(CP) ./files/FallbackCpuInfo.cpp $(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/FallbackCpuInfo.cpp
+	if [ "$(ARCH)" = "aarch64" ]; then \
+		$(TARGET_CXX) \
+			$(TARGET_CXXFLAGS) \
+			$(TARGET_CPPFLAGS) \
+			-std=gnu++2a -O3 -DARM64 \
+			-I$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search \
+			-I$(PKG_BUILD_DIR)/period_search_common \
+			-I$(STAGING_DIR)/usr/include/boinc \
+			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/areanorm.cpp \
+			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/blmatrix.cpp \
+			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/bright.cpp \
+			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/bright_asimd.cpp \
+			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/conv.cpp \
+			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/conv_asimd.cpp \
+			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/covsrt.cpp \
+			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/CpuInfoArm64.cpp \
+			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/curv.cpp \
+			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/curv_asimd.cpp \
+			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/ellfit.cpp \
+			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/EnumHelpers.cpp \
+			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/gauss_errc.cpp \
+			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/gauss_errc_asimd.cpp \
+			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/lubksb.cpp \
+			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/ludcmp.cpp \
+			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/matrix.cpp \
+			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/mrqcof.cpp \
+			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/mrqcof_asimd.cpp \
+			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/mrqmin.cpp \
+			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/phasec.cpp \
+			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/sphfunc.cpp \
+			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/systeminfo.cpp \
+			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/trifac.cpp \
+			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/VersionInfo.cpp \
+			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/period_search_BOINC.cpp \
+			$(PKG_BUILD_DIR)/period_search_common/arrayHelpers.cpp \
+			$(PKG_BUILD_DIR)/period_search_common/dot_product.cpp \
+			$(PKG_BUILD_DIR)/period_search_common/LcHelpers.cpp \
+			$(TARGET_LDFLAGS) -Wl,--as-needed \
+			-L$(STAGING_DIR)/usr/lib \
+			-lboinc_api -lboinc -lm -lpthread \
+			-o $(PKG_BUILD_DIR)/build/period_search_openwrt_aarch64; \
+	else \
 	$(TARGET_CXX) \
 		$(TARGET_CXXFLAGS) \
 		$(TARGET_CPPFLAGS) \
@@ -45,45 +88,48 @@ define Build/Compile
 		-I$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search \
 		-I$(PKG_BUILD_DIR)/period_search_common \
 		-I$(STAGING_DIR)/usr/include/boinc \
-		$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/areanorm.cpp \
-		$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/blmatrix.cpp \
-		$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/bright.cpp \
-		$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/bright_asimd.cpp \
-		$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/conv.cpp \
-		$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/conv_asimd.cpp \
-		$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/covsrt.cpp \
-		$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/CpuInfoArm64.cpp \
-		$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/curv.cpp \
-		$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/curv_asimd.cpp \
-		$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/ellfit.cpp \
-		$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/EnumHelpers.cpp \
-		$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/gauss_errc.cpp \
-		$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/gauss_errc_asimd.cpp \
-		$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/lubksb.cpp \
-		$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/ludcmp.cpp \
-		$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/matrix.cpp \
-		$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/mrqcof.cpp \
-		$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/mrqcof_asimd.cpp \
-		$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/mrqmin.cpp \
-		$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/phasec.cpp \
-		$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/sphfunc.cpp \
-		$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/systeminfo.cpp \
-		$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/trifac.cpp \
-		$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/VersionInfo.cpp \
-		$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/period_search_BOINC.cpp \
-		$(PKG_BUILD_DIR)/period_search_common/arrayHelpers.cpp \
-		$(PKG_BUILD_DIR)/period_search_common/dot_product.cpp \
-		$(PKG_BUILD_DIR)/period_search_common/LcHelpers.cpp \
-		$(TARGET_LDFLAGS) -Wl,--as-needed \
-		-L$(STAGING_DIR)/usr/lib \
-		-lboinc_api -lboinc -lm -lpthread \
-		-o $(PKG_BUILD_DIR)/build/period_search_openwrt_aarch64
+			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/areanorm.cpp \
+			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/blmatrix.cpp \
+			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/bright.cpp \
+			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/conv.cpp \
+			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/covsrt.cpp \
+			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/FallbackCpuInfo.cpp \
+			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/curv.cpp \
+			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/ellfit.cpp \
+			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/EnumHelpers.cpp \
+			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/gauss_errc.cpp \
+			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/lubksb.cpp \
+			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/ludcmp.cpp \
+			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/matrix.cpp \
+			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/mrqcof.cpp \
+			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/mrqmin.cpp \
+			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/phasec.cpp \
+			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/sphfunc.cpp \
+			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/systeminfo.cpp \
+			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/trifac.cpp \
+			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/VersionInfo.cpp \
+			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/period_search_BOINC.cpp \
+			$(PKG_BUILD_DIR)/period_search_common/arrayHelpers.cpp \
+			$(PKG_BUILD_DIR)/period_search_common/dot_product.cpp \
+			$(PKG_BUILD_DIR)/period_search_common/LcHelpers.cpp \
+			$(TARGET_LDFLAGS) -Wl,--as-needed \
+			-L$(STAGING_DIR)/usr/lib \
+			-lboinc_api -lboinc -lm -lpthread \
+			-o $(PKG_BUILD_DIR)/build/period_search_openwrt_$(ARCH_PACKAGES); \
+	fi
 endef
 
 define Package/period-search/install
 	$(INSTALL_DIR) $(1)/opt/boinc/projects/asteroidsathome.net_boinc
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/build/period_search_openwrt_aarch64 $(1)/opt/boinc/projects/asteroidsathome.net_boinc/
+	if [ "$(ARCH)" = "mips" ]; then \
+		$(INSTALL_BIN) $(PKG_BUILD_DIR)/build/period_search_openwrt_$(ARCH_PACKAGES) $(1)/opt/boinc/projects/asteroidsathome.net_boinc/; \
+	else \
+		$(INSTALL_BIN) $(PKG_BUILD_DIR)/build/period_search_openwrt_aarch64 $(1)/opt/boinc/projects/asteroidsathome.net_boinc/; \
+	fi
 	$(CP) ./files/app_info.xml $(PKG_BUILD_DIR)/app_info.xml
+	if [ "$(ARCH)" = "mips" ]; then \
+		$(SED) 's|period_search_openwrt_aarch64|period_search_openwrt_$(ARCH_PACKAGES)|g' $(PKG_BUILD_DIR)/app_info.xml; \
+	fi
 	$(SED) 's|@BOINC_API_VERSION@|$(BOINC_API_VERSION)|g' $(PKG_BUILD_DIR)/app_info.xml
 	$(INSTALL_DATA) $(PKG_BUILD_DIR)/app_info.xml $(1)/opt/boinc/projects/asteroidsathome.net_boinc/
 endef
