@@ -69,7 +69,7 @@ jobs:
           # Point the custom feed at this repository.
           # Only boinc and period-search will be installed (pla-util is excluded).
           echo "src-link custom ${{ github.workspace }}" >> feeds.conf.default
-          ./scripts/feeds update custom
+          ./scripts/feeds update -a
           ./scripts/feeds install boinc period-search
 
       - name: Compile packages
