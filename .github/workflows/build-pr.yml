@@ -1,0 +1,94 @@
+name: Build OpenWrt Packages (PR)
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # Build packages for each architecture using the OpenWrt 25.12 SDK
+  # ──────────────────────────────────────────────────────────────────────────
+  build:
+    name: Build (${{ matrix.arch }})
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: aarch64_cortex-a53
+            target: armsr/armv8
+          - arch: x86_64
+            target: x86/64
+          - arch: mipsel_24kc
+            target: ramips/mt7621
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            libncurses5-dev \
+            zlib1g-dev \
+            gawk \
+            git \
+            gettext \
+            libssl-dev \
+            xsltproc \
+            rsync \
+            wget \
+            unzip \
+            python3 \
+            zstd
+
+      - name: Download OpenWrt 25.12 SDK
+        run: |
+          TARGET="${{ matrix.target }}"
+          BASE_URL="https://downloads.openwrt.org/snapshots/targets/${TARGET}"
+          # Discover the current SDK filename from the snapshot index
+          SDK_FILE=$(wget -qO- "${BASE_URL}/" \
+            | grep -oP 'openwrt-sdk[^"]*Linux-x86_64\.tar\.zst' \
+            | head -1)
+          echo "Downloading SDK: ${SDK_FILE}"
+          wget -q "${BASE_URL}/${SDK_FILE}" -O sdk.tar.zst
+          mkdir sdk
+          tar --zstd -xf sdk.tar.zst -C sdk --strip-components=1
+
+      - name: Configure SDK feed
+        working-directory: sdk
+        run: |
+          # Point the custom feed at this repository.
+          # Only boinc and period-search will be installed (pla-util is excluded).
+          echo "src-link custom ${{ github.workspace }}" >> feeds.conf.default
+          ./scripts/feeds update -a
+          ./scripts/feeds install boinc period-search
+
+      - name: Compile packages
+        working-directory: sdk
+        run: |
+          make defconfig
+          make package/boinc/compile -j$(nproc) V=s
+          make package/period-search/compile -j$(nproc) V=s
+
+      - name: Collect built .apk files
+        run: |
+          mkdir -p dist
+          find sdk/bin/packages -name "*.apk" -exec cp {} dist/ \;
+          echo "Packages collected:"
+          ls dist/
+
+      - name: Upload packages artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: packages-${{ matrix.arch }}
+          path: dist/
+          if-no-files-found: warn
