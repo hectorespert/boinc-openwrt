@@ -100,6 +100,14 @@ jobs:
           path: dist/
           if-no-files-found: warn
 
+      - name: Upload host apk binary
+        if: matrix.arch == 'x86_64'
+        uses: actions/upload-artifact@v4
+        with:
+          name: host-apk
+          path: sdk/staging_dir/host/bin/apk
+          if-no-files-found: error
+
   # ──────────────────────────────────────────────────────────────────────────
   # JOB 2: Generate APK repository index and GitHub Pages site
   # ──────────────────────────────────────────────────────────────────────────
@@ -109,10 +117,14 @@ jobs:
     needs: build
 
     steps:
-      - name: Install apk-tools
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y apk-tools
+      - name: Download host apk binary
+        uses: actions/download-artifact@v4
+        with:
+          name: host-apk
+          path: /tmp/host-apk/
+
+      - name: Install apk
+        run: sudo install -m 755 /tmp/host-apk/apk /usr/local/bin/apk
 
       - name: Download all architecture artifacts
         uses: actions/download-artifact@v4
