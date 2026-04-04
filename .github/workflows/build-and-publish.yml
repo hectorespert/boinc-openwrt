@@ -93,20 +93,19 @@ jobs:
           echo "Packages collected:"
           ls dist/
 
+      - name: Generate APK repository index
+        run: |
+          APK="sdk/staging_dir/host/bin/apk"
+          (cd dist && "$APK" mkndx --allow-untrusted --output packages.adb *.apk)
+          echo "Index generated:"
+          ls -lh dist/packages.adb
+
       - name: Upload packages artifact
         uses: actions/upload-artifact@v4
         with:
           name: packages-${{ matrix.arch }}
           path: dist/
           if-no-files-found: warn
-
-      - name: Upload host apk binary
-        if: matrix.arch == 'x86_64'
-        uses: actions/upload-artifact@v4
-        with:
-          name: host-apk
-          path: sdk/staging_dir/host/bin/apk
-          if-no-files-found: error
 
   # ──────────────────────────────────────────────────────────────────────────
   # JOB 2: Generate APK repository index and GitHub Pages site
@@ -117,15 +116,6 @@ jobs:
     needs: build
 
     steps:
-      - name: Download host apk binary
-        uses: actions/download-artifact@v4
-        with:
-          name: host-apk
-          path: /tmp/host-apk/
-
-      - name: Install apk
-        run: sudo install -m 755 /tmp/host-apk/apk /usr/local/bin/apk
-
       - name: Download all architecture artifacts
         uses: actions/download-artifact@v4
         with:
@@ -133,18 +123,13 @@ jobs:
           path: dist/
           merge-multiple: false
 
-      - name: Generate repository index for each architecture
+      - name: Assemble site from per-architecture artifacts
         run: |
-          # 'apk mkndx' is the correct OpenWrt index-creation command (apk v3).
-          # --allow-untrusted skips package signature verification, mirroring
-          # what package/Makefile does in the OpenWrt build system.
-          # No --root or --keys-dir are needed here since we are not signing
-          # the index and --allow-untrusted bypasses key lookups entirely.
           mkdir -p site
 
           for arch_dir in dist/packages-*/; do
             arch=$(basename "$arch_dir" | sed 's/packages-//')
-            echo "--- Generating index for: ${arch} ---"
+            echo "--- Setting up site for: ${arch} ---"
             mkdir -p "site/${arch}"
 
             pkg_count=$(find "$arch_dir" -name "*.apk" | wc -l)
@@ -154,13 +139,13 @@ jobs:
             fi
             find "$arch_dir" -name "*.apk" -exec cp {} "site/${arch}/" \;
 
-            (cd "site/${arch}" && \
-              apk mkndx \
-                --allow-untrusted \
-                --output packages.adb \
-                *.apk)
-            echo "packages.adb created for ${arch}:"
-            ls -lh "site/${arch}/packages.adb"
+            if [ -f "${arch_dir}packages.adb" ]; then
+              cp "${arch_dir}packages.adb" "site/${arch}/"
+              echo "packages.adb copied for ${arch}:"
+              ls -lh "site/${arch}/packages.adb"
+            else
+              echo "WARNING: No packages.adb found for ${arch}"
+            fi
           done
 
       - name: Generate index.html
