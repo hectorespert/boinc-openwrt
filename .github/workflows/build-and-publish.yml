@@ -100,6 +100,14 @@ jobs:
           path: dist/
           if-no-files-found: warn
 
+      - name: Upload host apk binary
+        if: matrix.arch == 'x86_64'
+        uses: actions/upload-artifact@v4
+        with:
+          name: host-apk
+          path: sdk/staging_dir/host/bin/apk
+          if-no-files-found: error
+
   # ──────────────────────────────────────────────────────────────────────────
   # JOB 2: Generate APK repository index and GitHub Pages site
   # ──────────────────────────────────────────────────────────────────────────
@@ -109,10 +117,14 @@ jobs:
     needs: build
 
     steps:
-      - name: Install apk-tools
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y apk-tools
+      - name: Download host apk binary
+        uses: actions/download-artifact@v4
+        with:
+          name: host-apk
+          path: /tmp/host-apk/
+
+      - name: Install apk
+        run: sudo install -m 755 /tmp/host-apk/apk /usr/local/bin/apk
 
       - name: Download all architecture artifacts
         uses: actions/download-artifact@v4
@@ -121,33 +133,20 @@ jobs:
           path: dist/
           merge-multiple: false
 
-      - name: Generate RSA signing key
+      - name: Generate repository index for each architecture
         run: |
-          # NOTE: This generates a new key on every run.
-          # For production use, store the private key as a GitHub Secret named
-          # APK_SIGNING_KEY and replace this step with:
-          #
-          #   - name: Load signing key
-          #     run: echo "${{ secrets.APK_SIGNING_KEY }}" > private.pem
-          #
-          # Then add the corresponding public key to the repository so that
-          # users only need to trust it once.
-          openssl genrsa -out private.pem 2048
-          openssl rsa -in private.pem -pubout -out public.pem
-          KEY_ID=$(openssl rsa -in private.pem -pubout -outform DER \
-            | sha256sum | head -c 16)
-          echo "KEY_ID=${KEY_ID}" >> "$GITHUB_ENV"
-          echo "Signing key ID: ${KEY_ID}"
-
-      - name: Generate APKINDEX for each architecture
-        run: |
+          # 'apk mkndx' is the correct OpenWrt index-creation command (apk v3).
+          # --allow-untrusted skips package signature verification, mirroring
+          # what package/Makefile does in the OpenWrt build system.
+          # No --root or --keys-dir are needed here since we are not signing
+          # the index and --allow-untrusted bypasses key lookups entirely.
           mkdir -p site
+
           for arch_dir in dist/packages-*/; do
             arch=$(basename "$arch_dir" | sed 's/packages-//')
             echo "--- Generating index for: ${arch} ---"
             mkdir -p "site/${arch}"
 
-            # Copy .apk files for this architecture
             pkg_count=$(find "$arch_dir" -name "*.apk" | wc -l)
             if [ "$pkg_count" -eq 0 ]; then
               echo "No packages found for ${arch}, skipping."
@@ -155,25 +154,13 @@ jobs:
             fi
             find "$arch_dir" -name "*.apk" -exec cp {} "site/${arch}/" \;
 
-            # Generate the APKINDEX
             (cd "site/${arch}" && \
-              apk index \
-                --rewrite-arch "${arch}" \
-                -o APKINDEX.tar.gz \
+              apk mkndx \
+                --allow-untrusted \
+                --output packages.adb \
                 *.apk)
-
-            # Sign the index with the RSA private key
-            # The signature is stored alongside the index so that apk can
-            # verify it when fetching the repository.
-            openssl dgst -sha256 \
-              -sign private.pem \
-              -out "site/${arch}/APKINDEX.tar.gz.sig" \
-              "site/${arch}/APKINDEX.tar.gz"
-
-            # Publish the public key inside each architecture directory so
-            # users can import it with:  apk add --allow-untrusted ...
-            # or copy it to /etc/apk/keys/ on their device.
-            cp public.pem "site/${arch}/repo-${KEY_ID}.pub"
+            echo "packages.adb created for ${arch}:"
+            ls -lh "site/${arch}/packages.adb"
           done
 
       - name: Generate index.html
@@ -210,17 +197,17 @@ jobs:
 
             <h2>Usage</h2>
             <p>Replace <code>ARCH</code> with your device architecture:</p>
-            <pre>apk add --repository https://hectorespert.github.io/boinc-openwrt/ARCH boinc</pre>
+            <pre>apk add --allow-untrusted --repository https://hectorespert.github.io/boinc-openwrt/ARCH boinc</pre>
 
             <p>Architecture-specific examples:</p>
             <pre># aarch64 (e.g. Raspberry Pi 3/4 with OpenWrt)
-          apk add --repository https://hectorespert.github.io/boinc-openwrt/aarch64_cortex-a53 boinc
+          apk add --allow-untrusted --repository https://hectorespert.github.io/boinc-openwrt/aarch64_cortex-a53 boinc
 
           # x86_64 (e.g. PC/server)
-          apk add --repository https://hectorespert.github.io/boinc-openwrt/x86_64 boinc
+          apk add --allow-untrusted --repository https://hectorespert.github.io/boinc-openwrt/x86_64 boinc
 
           # mipsel (e.g. many home routers)
-          apk add --repository https://hectorespert.github.io/boinc-openwrt/mipsel_24kc boinc</pre>
+          apk add --allow-untrusted --repository https://hectorespert.github.io/boinc-openwrt/mipsel_24kc boinc</pre>
 
             <p>
               Source code:
