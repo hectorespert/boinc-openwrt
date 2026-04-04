@@ -94,8 +94,9 @@ jobs:
           ls dist/
 
       - name: Generate APK repository index
+        env:
+          APK: sdk/staging_dir/host/bin/apk
         run: |
-          APK="sdk/staging_dir/host/bin/apk"
           (cd dist && "$APK" mkndx --allow-untrusted --output packages.adb *.apk)
           echo "Index generated:"
           ls -lh dist/packages.adb
