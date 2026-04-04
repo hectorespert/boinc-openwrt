@@ -103,45 +103,18 @@ jobs:
           fi
           echo "apk version: $("$APK" --version)"
 
-          # Locate the APK signing public key produced by the SDK build system.
-          # OpenWrt 25.x SDKs use public-key.pem / private-key.pem.
-          # Older SDKs used key-build.pub / key-build.
+          # Use 'apk mkndx' — the correct OpenWrt index-creation subcommand
+          # (used by package/Makefile in OpenWrt 25.x).  --allow-untrusted
+          # accepts packages regardless of their signature status, which is
+          # exactly what the upstream build system does.
           SDK="$GITHUB_WORKSPACE/sdk"
-          KEY_PUB=""
-
-          # 1. Modern name (OpenWrt 25.x+)
-          [ -f "$SDK/public-key.pem" ] && KEY_PUB="$SDK/public-key.pem"
-          # 2. Legacy name
-          [ -z "$KEY_PUB" ] && [ -f "$SDK/key-build.pub" ] && KEY_PUB="$SDK/key-build.pub"
-          # 3. Derive from modern private key
-          if [ -z "$KEY_PUB" ] && [ -f "$SDK/private-key.pem" ]; then
-            echo "Deriving public key from private-key.pem..."
-            openssl pkey -in "$SDK/private-key.pem" -pubout -out "$SDK/public-key.pem" \
-              || openssl rsa  -in "$SDK/private-key.pem" -pubout -out "$SDK/public-key.pem"
-            [ -f "$SDK/public-key.pem" ] && KEY_PUB="$SDK/public-key.pem"
-          fi
-          # 4. Derive from legacy private key
-          if [ -z "$KEY_PUB" ] && [ -f "$SDK/key-build" ]; then
-            echo "Deriving public key from key-build..."
-            openssl rsa  -in "$SDK/key-build" -pubout -out "$SDK/key-build.pub" \
-              || openssl pkey -in "$SDK/key-build" -pubout -out "$SDK/key-build.pub"
-            [ -f "$SDK/key-build.pub" ] && KEY_PUB="$SDK/key-build.pub"
-          fi
-
-          if [ -z "$KEY_PUB" ]; then
-            echo "ERROR: Could not locate the SDK signing key."
-            echo "=== sdk/ root listing ==="
-            ls -la "$SDK/" || true
-            exit 1
-          fi
-
-          echo "Using signing key: $KEY_PUB"
-          mkdir -p /tmp/apkroot/etc/apk/keys
-          cp "$KEY_PUB" /tmp/apkroot/etc/apk/keys/
-
           mkdir -p /tmp/apktest
           find dist/ -name "*.apk" -exec cp {} /tmp/apktest/ \;
-          (cd /tmp/apktest && "$APK" --root /tmp/apkroot index \
-            --rewrite-arch x86_64 -o APKINDEX.tar.gz *.apk)
-          echo "APKINDEX generated successfully:"
+          (cd /tmp/apktest && "$APK" mkndx \
+            --root "$SDK" \
+            --keys-dir "$SDK" \
+            --allow-untrusted \
+            --output packages.adb \
+            *.apk)
+          echo "Index generated:"
           ls -lh /tmp/apktest/
