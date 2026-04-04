@@ -111,34 +111,45 @@ jobs:
       - name: Prepare and upload SDK build key
         if: matrix.arch == 'x86_64'
         run: |
-          KEY_PUB="sdk/key-build.pub"
-          KEY_PRIV="sdk/key-build"
+          SDK="sdk"
+          KEY_PUB=""
 
-          # Derive the public key from the private key when only the private
-          # key is present (some snapshot SDKs omit key-build.pub).
-          if [ ! -f "$KEY_PUB" ] && [ -f "$KEY_PRIV" ]; then
-            echo "Deriving public key from private key..."
-            openssl rsa  -in "$KEY_PRIV" -pubout -out "$KEY_PUB" \
-              || openssl pkey -in "$KEY_PRIV" -pubout -out "$KEY_PUB" \
-              || echo "WARNING: openssl could not derive public key from $KEY_PRIV"
+          # 1. Modern name (OpenWrt 25.x+)
+          [ -f "$SDK/public-key.pem" ] && KEY_PUB="$SDK/public-key.pem"
+          # 2. Legacy name
+          [ -z "$KEY_PUB" ] && [ -f "$SDK/key-build.pub" ] && KEY_PUB="$SDK/key-build.pub"
+          # 3. Derive from modern private key
+          if [ -z "$KEY_PUB" ] && [ -f "$SDK/private-key.pem" ]; then
+            echo "Deriving public key from private-key.pem..."
+            openssl pkey -in "$SDK/private-key.pem" -pubout -out "$SDK/public-key.pem" \
+              || openssl rsa  -in "$SDK/private-key.pem" -pubout -out "$SDK/public-key.pem"
+            [ -f "$SDK/public-key.pem" ] && KEY_PUB="$SDK/public-key.pem"
+          fi
+          # 4. Derive from legacy private key
+          if [ -z "$KEY_PUB" ] && [ -f "$SDK/key-build" ]; then
+            echo "Deriving public key from key-build..."
+            openssl rsa  -in "$SDK/key-build" -pubout -out "$SDK/key-build.pub" \
+              || openssl pkey -in "$SDK/key-build" -pubout -out "$SDK/key-build.pub"
+            [ -f "$SDK/key-build.pub" ] && KEY_PUB="$SDK/key-build.pub"
           fi
 
-          if [ ! -f "$KEY_PUB" ]; then
-            echo "ERROR: key-build.pub not found and could not be derived."
+          if [ -z "$KEY_PUB" ]; then
+            echo "ERROR: Could not locate the SDK signing key."
             echo "=== sdk/ root ==="
             ls -la sdk/ || true
-            echo "=== key-build* files ==="
-            find sdk/ -name "key-build*" 2>/dev/null || true
             exit 1
           fi
-          echo "SDK build key ready: $KEY_PUB"
+
+          # Normalise to a fixed path so the upload-artifact step is simple.
+          cp "$KEY_PUB" sdk/sdk-build-key.pub
+          echo "SDK build key ready: $KEY_PUB -> sdk/sdk-build-key.pub"
 
       - name: Upload SDK build key
         if: matrix.arch == 'x86_64'
         uses: actions/upload-artifact@v4
         with:
           name: sdk-build-key
-          path: sdk/key-build.pub
+          path: sdk/sdk-build-key.pub
           if-no-files-found: error
 
   # ──────────────────────────────────────────────────────────────────────────
@@ -195,7 +206,7 @@ jobs:
           # Set up a root directory that trusts the SDK build key.
           # The key was used to sign the packages during compilation.
           mkdir -p /tmp/apkroot/etc/apk/keys
-          cp /tmp/sdk-key/key-build.pub /tmp/apkroot/etc/apk/keys/
+          cp /tmp/sdk-key/sdk-build-key.pub /tmp/apkroot/etc/apk/keys/
 
           mkdir -p site
           for arch_dir in dist/packages-*/; do

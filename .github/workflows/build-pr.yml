@@ -104,39 +104,34 @@ jobs:
           echo "apk version: $("$APK" --version)"
 
           # Locate the APK signing public key produced by the SDK build system.
-          # OpenWrt normally generates sdk/key-build (private) and sdk/key-build.pub
-          # (public) on the first package compilation.  Some snapshot SDKs ship only
-          # the private key; in that case derive the public key with openssl.
-          KEY_PUB="$GITHUB_WORKSPACE/sdk/key-build.pub"
-          KEY_PRIV="$GITHUB_WORKSPACE/sdk/key-build"
+          # OpenWrt 25.x SDKs use public-key.pem / private-key.pem.
+          # Older SDKs used key-build.pub / key-build.
+          SDK="$GITHUB_WORKSPACE/sdk"
+          KEY_PUB=""
 
-          if [ ! -f "$KEY_PUB" ] && [ -f "$KEY_PRIV" ]; then
-            echo "key-build.pub missing; deriving from private key..."
-            openssl rsa  -in "$KEY_PRIV" -pubout -out "$KEY_PUB" \
-              || openssl pkey -in "$KEY_PRIV" -pubout -out "$KEY_PUB" \
-              || echo "WARNING: openssl could not derive public key from $KEY_PRIV"
+          # 1. Modern name (OpenWrt 25.x+)
+          [ -f "$SDK/public-key.pem" ] && KEY_PUB="$SDK/public-key.pem"
+          # 2. Legacy name
+          [ -z "$KEY_PUB" ] && [ -f "$SDK/key-build.pub" ] && KEY_PUB="$SDK/key-build.pub"
+          # 3. Derive from modern private key
+          if [ -z "$KEY_PUB" ] && [ -f "$SDK/private-key.pem" ]; then
+            echo "Deriving public key from private-key.pem..."
+            openssl pkey -in "$SDK/private-key.pem" -pubout -out "$SDK/public-key.pem" \
+              || openssl rsa  -in "$SDK/private-key.pem" -pubout -out "$SDK/public-key.pem"
+            [ -f "$SDK/public-key.pem" ] && KEY_PUB="$SDK/public-key.pem"
+          fi
+          # 4. Derive from legacy private key
+          if [ -z "$KEY_PUB" ] && [ -f "$SDK/key-build" ]; then
+            echo "Deriving public key from key-build..."
+            openssl rsa  -in "$SDK/key-build" -pubout -out "$SDK/key-build.pub" \
+              || openssl pkey -in "$SDK/key-build" -pubout -out "$SDK/key-build.pub"
+            [ -f "$SDK/key-build.pub" ] && KEY_PUB="$SDK/key-build.pub"
           fi
 
-          # Broader search: look for any *.pub file in the SDK tree
-          # (excluding heavyweight build/download subdirs).
-          if [ ! -f "$KEY_PUB" ]; then
-            echo "sdk/key-build.pub still missing; searching SDK tree..."
-            FOUND=$(find "$GITHUB_WORKSPACE/sdk" \
-              \( -name "key-build.pub" -o -name "*.rsa.pub" \) \
-              -not -path "*/build_dir/*" \
-              -not -path "*/dl/*" \
-              2>/dev/null | head -1)
-            [ -n "$FOUND" ] && KEY_PUB="$FOUND"
-          fi
-
-          if [ ! -f "$KEY_PUB" ]; then
+          if [ -z "$KEY_PUB" ]; then
             echo "ERROR: Could not locate the SDK signing key."
             echo "=== sdk/ root listing ==="
-            ls -la "$GITHUB_WORKSPACE/sdk/" || true
-            echo "=== key-build* files anywhere in SDK ==="
-            find "$GITHUB_WORKSPACE/sdk" -name "key-build*" 2>/dev/null || true
-            echo "=== *.pub files in staging_dir/host ==="
-            find "$GITHUB_WORKSPACE/sdk/staging_dir/host" -name "*.pub" 2>/dev/null || true
+            ls -la "$SDK/" || true
             exit 1
           fi
 
