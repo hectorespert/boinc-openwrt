@@ -108,6 +108,14 @@ jobs:
           path: sdk/staging_dir/host/bin/apk
           if-no-files-found: error
 
+      - name: Upload SDK build key
+        if: matrix.arch == 'x86_64'
+        uses: actions/upload-artifact@v4
+        with:
+          name: sdk-build-key
+          path: sdk/key-build.pub
+          if-no-files-found: error
+
   # ──────────────────────────────────────────────────────────────────────────
   # JOB 2: Generate APK repository index and GitHub Pages site
   # ──────────────────────────────────────────────────────────────────────────
@@ -122,6 +130,12 @@ jobs:
         with:
           name: host-apk
           path: /tmp/host-apk/
+
+      - name: Download SDK build key
+        uses: actions/download-artifact@v4
+        with:
+          name: sdk-build-key
+          path: /tmp/sdk-key/
 
       - name: Install apk
         run: sudo install -m 755 /tmp/host-apk/apk /usr/local/bin/apk
@@ -153,6 +167,11 @@ jobs:
 
       - name: Generate APKINDEX for each architecture
         run: |
+          # Set up a root directory that trusts the SDK build key.
+          # The key was used to sign the packages during compilation.
+          mkdir -p /tmp/apkroot/etc/apk/keys
+          cp /tmp/sdk-key/key-build.pub /tmp/apkroot/etc/apk/keys/
+
           mkdir -p site
           for arch_dir in dist/packages-*/; do
             arch=$(basename "$arch_dir" | sed 's/packages-//')
@@ -169,7 +188,7 @@ jobs:
 
             # Generate the APKINDEX
             (cd "site/${arch}" && \
-              apk index \
+              apk --root /tmp/apkroot index \
                 --rewrite-arch "${arch}" \
                 -o APKINDEX.tar.gz \
                 *.apk)
