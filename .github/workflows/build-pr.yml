@@ -112,9 +112,9 @@ jobs:
 
           if [ ! -f "$KEY_PUB" ] && [ -f "$KEY_PRIV" ]; then
             echo "key-build.pub missing; deriving from private key..."
-            openssl rsa  -in "$KEY_PRIV" -pubout -out "$KEY_PUB" 2>/dev/null \
-              || openssl pkey -in "$KEY_PRIV" -pubout -out "$KEY_PUB" 2>/dev/null \
-              || true
+            openssl rsa  -in "$KEY_PRIV" -pubout -out "$KEY_PUB" \
+              || openssl pkey -in "$KEY_PRIV" -pubout -out "$KEY_PUB" \
+              || echo "WARNING: openssl could not derive public key from $KEY_PRIV"
           fi
 
           # Broader search: look for any *.pub file in the SDK tree

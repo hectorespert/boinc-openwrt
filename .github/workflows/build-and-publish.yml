@@ -118,9 +118,9 @@ jobs:
           # key is present (some snapshot SDKs omit key-build.pub).
           if [ ! -f "$KEY_PUB" ] && [ -f "$KEY_PRIV" ]; then
             echo "Deriving public key from private key..."
-            openssl rsa  -in "$KEY_PRIV" -pubout -out "$KEY_PUB" 2>/dev/null \
-              || openssl pkey -in "$KEY_PRIV" -pubout -out "$KEY_PUB" 2>/dev/null \
-              || true
+            openssl rsa  -in "$KEY_PRIV" -pubout -out "$KEY_PUB" \
+              || openssl pkey -in "$KEY_PRIV" -pubout -out "$KEY_PUB" \
+              || echo "WARNING: openssl could not derive public key from $KEY_PRIV"
           fi
 
           if [ ! -f "$KEY_PUB" ]; then
