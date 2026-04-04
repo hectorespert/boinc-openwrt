@@ -138,7 +138,8 @@ jobs:
           # 'apk mkndx' is the correct OpenWrt index-creation command (apk v3).
           # --allow-untrusted skips package signature verification, mirroring
           # what package/Makefile does in the OpenWrt build system.
-          mkdir -p /tmp/apkroot
+          # No --root or --keys-dir are needed here since we are not signing
+          # the index and --allow-untrusted bypasses key lookups entirely.
           mkdir -p site
 
           for arch_dir in dist/packages-*/; do
@@ -155,7 +156,6 @@ jobs:
 
             (cd "site/${arch}" && \
               apk mkndx \
-                --root /tmp/apkroot \
                 --allow-untrusted \
                 --output packages.adb \
                 *.apk)

@@ -107,6 +107,8 @@ jobs:
           # (used by package/Makefile in OpenWrt 25.x).  --allow-untrusted
           # accepts packages regardless of their signature status, which is
           # exactly what the upstream build system does.
+          # --root and --keys-dir mirror the upstream invocation; they point
+          # to the SDK root which holds the EC key pair used during the build.
           SDK="$GITHUB_WORKSPACE/sdk"
           mkdir -p /tmp/apktest
           find dist/ -name "*.apk" -exec cp {} /tmp/apktest/ \;
