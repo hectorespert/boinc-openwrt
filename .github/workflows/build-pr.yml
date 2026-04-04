@@ -104,6 +104,6 @@ jobs:
           echo "apk version: $("$APK" --version)"
           mkdir -p /tmp/apktest
           find dist/ -name "*.apk" -exec cp {} /tmp/apktest/ \;
-          (cd /tmp/apktest && "$APK" index --rewrite-arch x86_64 -o APKINDEX.tar.gz *.apk)
+          (cd /tmp/apktest && "$APK" index --allow-untrusted --rewrite-arch x86_64 -o APKINDEX.tar.gz *.apk)
           echo "APKINDEX generated successfully:"
           ls -lh /tmp/apktest/
