@@ -86,37 +86,17 @@ jobs:
           echo "Packages collected:"
           ls dist/
 
+      - name: Generate APK repository index
+        run: |
+          APK="$GITHUB_WORKSPACE/sdk/staging_dir/host/bin/apk"
+          echo "apk version: $("$APK" --version)"
+          (cd dist && "$APK" mkndx --allow-untrusted --output packages.adb *.apk)
+          echo "Index generated:"
+          ls -lh dist/packages.adb
+
       - name: Upload packages artifact
         uses: actions/upload-artifact@v4
         with:
           name: packages-${{ matrix.arch }}
           path: dist/
           if-no-files-found: warn
-
-      - name: Test apk index generation
-        if: matrix.arch == 'x86_64'
-        run: |
-          APK="$GITHUB_WORKSPACE/sdk/staging_dir/host/bin/apk"
-          if [ ! -x "$APK" ]; then
-            echo "ERROR: apk binary not found at $APK"
-            exit 1
-          fi
-          echo "apk version: $("$APK" --version)"
-
-          # Use 'apk mkndx' — the correct OpenWrt index-creation subcommand
-          # (used by package/Makefile in OpenWrt 25.x).  --allow-untrusted
-          # accepts packages regardless of their signature status, which is
-          # exactly what the upstream build system does.
-          # --root and --keys-dir mirror the upstream invocation; they point
-          # to the SDK root which holds the EC key pair used during the build.
-          SDK="$GITHUB_WORKSPACE/sdk"
-          mkdir -p /tmp/apktest
-          find dist/ -name "*.apk" -exec cp {} /tmp/apktest/ \;
-          (cd /tmp/apktest && "$APK" mkndx \
-            --root "$SDK" \
-            --keys-dir "$SDK" \
-            --allow-untrusted \
-            --output packages.adb \
-            *.apk)
-          echo "Index generated:"
-          ls -lh /tmp/apktest/
