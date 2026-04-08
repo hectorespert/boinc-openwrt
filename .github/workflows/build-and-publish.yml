@@ -203,20 +203,20 @@ jobs:
             <pre>wget -P /etc/apk/keys/ https://hectorespert.github.io/boinc-openwrt/public-key.pem</pre>
 
             <p>Step 2 — install packages:</p>
-            <pre>apk add --repository https://hectorespert.github.io/boinc-openwrt/ARCH boinc</pre>
+            <pre>apk add --repository https://hectorespert.github.io/boinc-openwrt/ARCH/packages.adb boinc</pre>
 
             <p>Architecture-specific examples:</p>
             <pre># aarch64 (e.g. Raspberry Pi 3/4 with OpenWrt)
           wget -P /etc/apk/keys/ https://hectorespert.github.io/boinc-openwrt/public-key.pem
-          apk add --repository https://hectorespert.github.io/boinc-openwrt/aarch64_cortex-a53 boinc
+          apk add --repository https://hectorespert.github.io/boinc-openwrt/aarch64_cortex-a53/packages.adb boinc
 
           # x86_64 (e.g. PC/server)
           wget -P /etc/apk/keys/ https://hectorespert.github.io/boinc-openwrt/public-key.pem
-          apk add --repository https://hectorespert.github.io/boinc-openwrt/x86_64 boinc
+          apk add --repository https://hectorespert.github.io/boinc-openwrt/x86_64/packages.adb boinc
 
           # mipsel (e.g. many home routers)
           wget -P /etc/apk/keys/ https://hectorespert.github.io/boinc-openwrt/public-key.pem
-          apk add --repository https://hectorespert.github.io/boinc-openwrt/mipsel_24kc boinc</pre>
+          apk add --repository https://hectorespert.github.io/boinc-openwrt/mipsel_24kc/packages.adb boinc</pre>
 
             <p>
               Source code:
