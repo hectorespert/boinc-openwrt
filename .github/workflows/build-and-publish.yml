@@ -93,11 +93,21 @@ jobs:
           echo "Packages collected:"
           ls dist/
 
-      - name: Generate APK repository index
+      - name: Set up signing key
+        run: |
+          echo "${{ secrets.SIGNING_KEY }}" | base64 -d > "$RUNNER_TEMP/private-key.pem"
+          chmod 600 "$RUNNER_TEMP/private-key.pem"
+          openssl ec -in "$RUNNER_TEMP/private-key.pem" -pubout -out dist/public-key.pem
+
+      - name: Generate signed APK repository index
         run: |
           APK="$GITHUB_WORKSPACE/sdk/staging_dir/host/bin/apk"
-          (cd dist && "$APK" mkndx --allow-untrusted --output packages.adb *.apk)
-          echo "Index generated:"
+          # --allow-untrusted accepts unsigned individual .apk files (packages are not
+          # signed during SDK compilation). --sign-key signs the resulting index so
+          # clients can verify repository integrity using the published public key.
+          (cd dist && "$APK" mkndx --allow-untrusted --sign-key "$RUNNER_TEMP/private-key.pem" --output packages.adb *.apk)
+          rm -f "$RUNNER_TEMP/private-key.pem"
+          echo "Signed index generated:"
           ls -lh dist/packages.adb
 
       - name: Upload packages artifact
@@ -146,6 +156,12 @@ jobs:
             else
               echo "WARNING: No packages.adb found for ${arch}"
             fi
+
+            # Copy public key to site root (only needed once — same key for all arches)
+            if [ ! -f "site/public-key.pem" ] && [ -f "${arch_dir}public-key.pem" ]; then
+              cp "${arch_dir}public-key.pem" "site/"
+              echo "public-key.pem copied to site root"
+            fi
           done
 
       - name: Generate index.html
@@ -181,18 +197,26 @@ jobs:
             </ul>
 
             <h2>Usage</h2>
-            <p>Replace <code>ARCH</code> with your device architecture:</p>
-            <pre>apk add --allow-untrusted --repository https://hectorespert.github.io/boinc-openwrt/ARCH boinc</pre>
+            <p>Replace <code>ARCH</code> with your device architecture.</p>
+
+            <p>Step 1 — trust the repository signing key (one-time setup):</p>
+            <pre>wget -P /etc/apk/keys/ https://hectorespert.github.io/boinc-openwrt/public-key.pem</pre>
+
+            <p>Step 2 — install packages:</p>
+            <pre>apk add --repository https://hectorespert.github.io/boinc-openwrt/ARCH boinc</pre>
 
             <p>Architecture-specific examples:</p>
             <pre># aarch64 (e.g. Raspberry Pi 3/4 with OpenWrt)
-          apk add --allow-untrusted --repository https://hectorespert.github.io/boinc-openwrt/aarch64_cortex-a53 boinc
+          wget -P /etc/apk/keys/ https://hectorespert.github.io/boinc-openwrt/public-key.pem
+          apk add --repository https://hectorespert.github.io/boinc-openwrt/aarch64_cortex-a53 boinc
 
           # x86_64 (e.g. PC/server)
-          apk add --allow-untrusted --repository https://hectorespert.github.io/boinc-openwrt/x86_64 boinc
+          wget -P /etc/apk/keys/ https://hectorespert.github.io/boinc-openwrt/public-key.pem
+          apk add --repository https://hectorespert.github.io/boinc-openwrt/x86_64 boinc
 
           # mipsel (e.g. many home routers)
-          apk add --allow-untrusted --repository https://hectorespert.github.io/boinc-openwrt/mipsel_24kc boinc</pre>
+          wget -P /etc/apk/keys/ https://hectorespert.github.io/boinc-openwrt/public-key.pem
+          apk add --repository https://hectorespert.github.io/boinc-openwrt/mipsel_24kc boinc</pre>
 
             <p>
               Source code:
