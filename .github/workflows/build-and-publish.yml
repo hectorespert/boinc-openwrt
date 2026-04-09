@@ -40,7 +40,7 @@ jobs:
         uses: openwrt/gh-action-sdk@v10
         env:
           ARCH: "${{ matrix.arch }}-openwrt-25.12"
-          FEEDNAME: boinc-openwrt
+          FEEDNAME: boinc_openwrt
           PACKAGES: "boinc period-search"
           PRIVATE_KEY: "${{ secrets.SIGNING_KEY }}"
           INDEX: 1
@@ -49,7 +49,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: packages-${{ matrix.arch }}
-          path: bin/packages/${{ matrix.arch }}/boinc-openwrt/
+          path: bin/packages/${{ matrix.arch }}/boinc_openwrt/
           if-no-files-found: warn
 
   index:
