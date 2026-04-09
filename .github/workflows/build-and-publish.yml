@@ -41,7 +41,7 @@ jobs:
         env:
           ARCH: "${{ matrix.arch }}-openwrt-25.12"
           FEEDNAME: boinc_openwrt
-          PACKAGES: "boinc period-search"
+          PACKAGES: "period-search"
           PRIVATE_KEY: "${{ secrets.SIGNING_KEY }}"
           INDEX: 1
 
@@ -113,7 +113,6 @@ jobs:
 
             <h2>Available packages</h2>
             <ul>
-              <li><strong>boinc</strong> — BOINC distributed computing client</li>
               <li><strong>period-search</strong> — Asteroids@home Period Search BOINC application</li>
             </ul>
 
@@ -131,20 +130,20 @@ jobs:
             <pre>wget -P /etc/apk/keys/ https://hectorespert.github.io/boinc-openwrt/public-key.pem</pre>
 
             <p>Step 2 — install packages:</p>
-            <pre>apk add --repository https://hectorespert.github.io/boinc-openwrt/ARCH/packages.adb boinc period-search</pre>
+            <pre>apk add --repository https://hectorespert.github.io/boinc-openwrt/ARCH/packages.adb period-search</pre>
 
             <p>Architecture-specific examples:</p>
             <pre># aarch64 (e.g. Raspberry Pi 3/4 with OpenWrt)
           wget -P /etc/apk/keys/ https://hectorespert.github.io/boinc-openwrt/public-key.pem
-          apk add --repository https://hectorespert.github.io/boinc-openwrt/aarch64_cortex-a53/packages.adb boinc
+          apk add --repository https://hectorespert.github.io/boinc-openwrt/aarch64_cortex-a53/packages.adb period-search
 
           # x86_64 (e.g. PC/server)
           wget -P /etc/apk/keys/ https://hectorespert.github.io/boinc-openwrt/public-key.pem
-          apk add --repository https://hectorespert.github.io/boinc-openwrt/x86_64/packages.adb boinc
+          apk add --repository https://hectorespert.github.io/boinc-openwrt/x86_64/packages.adb period-search
 
           # mipsel (e.g. many home routers)
           wget -P /etc/apk/keys/ https://hectorespert.github.io/boinc-openwrt/public-key.pem
-          apk add --repository https://hectorespert.github.io/boinc-openwrt/mipsel_24kc/packages.adb boinc</pre>
+          apk add --repository https://hectorespert.github.io/boinc-openwrt/mipsel_24kc/packages.adb period-search</pre>
 
             <p>
               Source code:
