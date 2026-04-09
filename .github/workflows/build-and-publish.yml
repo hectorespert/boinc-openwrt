@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -17,112 +18,43 @@ concurrency:
 
 jobs:
 
-  # ──────────────────────────────────────────────────────────────────────────
-  # JOB 1: Build packages for each architecture using the OpenWrt 25.12 SDK
-  # ──────────────────────────────────────────────────────────────────────────
   build:
     name: Build (${{ matrix.arch }})
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - arch: aarch64_cortex-a53
-            target: armsr/armv8
-          - arch: x86_64
-            target: x86/64
-          - arch: mipsel_24kc
-            target: ramips/mt7621
+        arch:
+          - aarch64_cortex-a53
+          - x86_64
+          - mipsel_24kc
 
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Install build dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            build-essential \
-            libncurses5-dev \
-            zlib1g-dev \
-            gawk \
-            git \
-            gettext \
-            libssl-dev \
-            xsltproc \
-            rsync \
-            wget \
-            unzip \
-            python3 \
-            zstd
-
-      - name: Download OpenWrt 25.12 SDK
-        run: |
-          TARGET="${{ matrix.target }}"
-          BASE_URL="https://downloads.openwrt.org/snapshots/targets/${TARGET}"
-          # Discover the current SDK filename from the snapshot index
-          SDK_FILE=$(wget -qO- "${BASE_URL}/" \
-            | grep -oP 'openwrt-sdk[^"]*Linux-x86_64\.tar\.zst' \
-            | head -1)
-          echo "Downloading SDK: ${SDK_FILE}"
-          wget -q "${BASE_URL}/${SDK_FILE}" -O sdk.tar.zst
-          mkdir sdk
-          tar --zstd -xf sdk.tar.zst -C sdk --strip-components=1
-
-      - name: Configure SDK feed
-        working-directory: sdk
-        run: |
-          # Point the custom feed at this repository.
-          # Only boinc and period-search will be installed (pla-util is excluded).
-          echo "src-link custom ${{ github.workspace }}" >> feeds.conf.default
-          ./scripts/feeds update -a
-          ./scripts/feeds install boinc period-search
-
-      - name: Compile packages
-        working-directory: sdk
-        run: |
-          make defconfig
-          make package/boinc/compile -j$(nproc) V=s
-          make package/period-search/compile -j$(nproc) V=s
-
-      - name: Collect built .apk files
-        run: |
-          mkdir -p dist
-          find sdk/bin/packages -name "*.apk" -exec cp {} dist/ \;
-          echo "Packages collected:"
-          ls dist/
-
-      - name: Set up signing key
-        run: |
-          echo "${{ secrets.SIGNING_KEY }}" | base64 -d > "$RUNNER_TEMP/private-key.pem"
-          chmod 600 "$RUNNER_TEMP/private-key.pem"
-          openssl ec -in "$RUNNER_TEMP/private-key.pem" -pubout -out dist/public-key.pem
-
-      - name: Generate signed APK repository index
-        run: |
-          APK="$GITHUB_WORKSPACE/sdk/staging_dir/host/bin/apk"
-          # --allow-untrusted accepts unsigned individual .apk files (packages are not
-          # signed during SDK compilation). --sign-key signs the resulting index so
-          # clients can verify repository integrity using the published public key.
-          (cd dist && "$APK" mkndx --allow-untrusted --sign-key "$RUNNER_TEMP/private-key.pem" --output packages.adb *.apk)
-          rm -f "$RUNNER_TEMP/private-key.pem"
-          echo "Signed index generated:"
-          ls -lh dist/packages.adb
+      - name: Build APK packages with OpenWrt SDK action
+        uses: openwrt/gh-action-sdk@v10
+        env:
+          ARCH: "${{ matrix.arch }}-openwrt-25.12"
+          FEEDNAME: boinc_openwrt
+          PACKAGES: "period-search"
+          PRIVATE_KEY: "${{ secrets.SIGNING_KEY }}"
+          INDEX: 1
 
       - name: Upload packages artifact
         uses: actions/upload-artifact@v4
         with:
           name: packages-${{ matrix.arch }}
-          path: dist/
+          path: bin/packages/${{ matrix.arch }}/boinc_openwrt/
           if-no-files-found: warn
 
-  # ──────────────────────────────────────────────────────────────────────────
-  # JOB 2: Generate APK repository index and GitHub Pages site
-  # ──────────────────────────────────────────────────────────────────────────
   index:
     name: Generate repository index
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: build
 
     steps:
@@ -137,32 +69,28 @@ jobs:
         run: |
           mkdir -p site
 
-          for arch_dir in dist/packages-*/; do
+          shopt -s nullglob
+          arch_dirs=(dist/packages-*/)
+          if [ ${#arch_dirs[@]} -eq 0 ]; then
+            echo "No package artifacts found"
+            exit 1
+          fi
+
+          for arch_dir in "${arch_dirs[@]}"; do
             arch=$(basename "$arch_dir" | sed 's/packages-//')
             echo "--- Setting up site for: ${arch} ---"
             mkdir -p "site/${arch}"
 
-            pkg_count=$(find "$arch_dir" -name "*.apk" | wc -l)
-            if [ "$pkg_count" -eq 0 ]; then
-              echo "No packages found for ${arch}, skipping."
-              continue
-            fi
-            find "$arch_dir" -name "*.apk" -exec cp {} "site/${arch}/" \;
-
-            if [ -f "${arch_dir}packages.adb" ]; then
-              cp "${arch_dir}packages.adb" "site/${arch}/"
-              echo "packages.adb copied for ${arch}:"
-              ls -lh "site/${arch}/packages.adb"
-            else
-              echo "WARNING: No packages.adb found for ${arch}"
-            fi
-
-            # Copy public key to site root (only needed once — same key for all arches)
-            if [ ! -f "site/public-key.pem" ] && [ -f "${arch_dir}public-key.pem" ]; then
-              cp "${arch_dir}public-key.pem" "site/"
-              echo "public-key.pem copied to site root"
-            fi
+            cp -a "${arch_dir}"/. "site/${arch}/"
           done
+
+      - name: Export public key
+        run: |
+          echo "${{ secrets.SIGNING_KEY }}" | base64 -d > "$RUNNER_TEMP/private-key.pem"
+          chmod 600 "$RUNNER_TEMP/private-key.pem"
+          openssl ec -in "$RUNNER_TEMP/private-key.pem" -pubout -out site/public-key.pem
+          chmod 644 site/public-key.pem
+          rm -f "$RUNNER_TEMP/private-key.pem"
 
       - name: Generate index.html
         run: |
@@ -181,11 +109,10 @@ jobs:
           </head>
           <body>
             <h1>boinc-openwrt Package Repository</h1>
-            <p>Custom OpenWrt packages built for OpenWrt 25.12+.</p>
+            <p>Custom OpenWrt packages built with openwrt/gh-action-sdk for OpenWrt 25.12.</p>
 
             <h2>Available packages</h2>
             <ul>
-              <li><strong>boinc</strong> — BOINC distributed computing client</li>
               <li><strong>period-search</strong> — Asteroids@home Period Search BOINC application</li>
             </ul>
 
@@ -203,20 +130,20 @@ jobs:
             <pre>wget -P /etc/apk/keys/ https://hectorespert.github.io/boinc-openwrt/public-key.pem</pre>
 
             <p>Step 2 — install packages:</p>
-            <pre>apk add --repository https://hectorespert.github.io/boinc-openwrt/ARCH/packages.adb boinc</pre>
+            <pre>apk add --repository https://hectorespert.github.io/boinc-openwrt/ARCH/packages.adb period-search</pre>
 
             <p>Architecture-specific examples:</p>
             <pre># aarch64 (e.g. Raspberry Pi 3/4 with OpenWrt)
           wget -P /etc/apk/keys/ https://hectorespert.github.io/boinc-openwrt/public-key.pem
-          apk add --repository https://hectorespert.github.io/boinc-openwrt/aarch64_cortex-a53/packages.adb boinc
+          apk add --repository https://hectorespert.github.io/boinc-openwrt/aarch64_cortex-a53/packages.adb period-search
 
           # x86_64 (e.g. PC/server)
           wget -P /etc/apk/keys/ https://hectorespert.github.io/boinc-openwrt/public-key.pem
-          apk add --repository https://hectorespert.github.io/boinc-openwrt/x86_64/packages.adb boinc
+          apk add --repository https://hectorespert.github.io/boinc-openwrt/x86_64/packages.adb period-search
 
           # mipsel (e.g. many home routers)
           wget -P /etc/apk/keys/ https://hectorespert.github.io/boinc-openwrt/public-key.pem
-          apk add --repository https://hectorespert.github.io/boinc-openwrt/mipsel_24kc/packages.adb boinc</pre>
+          apk add --repository https://hectorespert.github.io/boinc-openwrt/mipsel_24kc/packages.adb period-search</pre>
 
             <p>
               Source code:
@@ -233,12 +160,9 @@ jobs:
         with:
           path: site/
 
-  # ──────────────────────────────────────────────────────────────────────────
-  # JOB 3: Deploy to GitHub Pages
-  # ──────────────────────────────────────────────────────────────────────────
   deploy:
     name: Deploy to GitHub Pages
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: index
 
     environment:
