@@ -14,7 +14,7 @@ PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 
 PKG_LICENSE:=GPL-2.0-or-later
 PKG_BUILD_PARALLEL:=1
-PKG_BUILD_DEPENDS:=boinc
+PKG_BUILD_DEPENDS:=boinc fftw3/single gsl libxml2 zlib
 BOINC_API_VERSION:=$(shell awk '/^#define BOINC_MAJOR_VERSION/ {maj=$$3} /^#define BOINC_MINOR_VERSION/ {min=$$3} /^#define BOINC_RELEASE/ {rel=$$3} END { if (maj != "" && min != "" && rel != "") printf "%s.%s.%s", maj, min, rel; else printf "7.21.0" }' $(STAGING_DIR)/usr/include/boinc/version.h 2>/dev/null)
 
 include $(INCLUDE_DIR)/package.mk
@@ -24,7 +24,7 @@ define Package/binary-radio-pulsar-search
   CATEGORY:=Network
   TITLE:=Einstein@Home Binary Radio Pulsar Search custom BOINC app
   URL:=https://einsteinathome.org/es/source-license
-	DEPENDS:=+boinc +libstdcpp +libfftw3f +libgsl +libgslcblas +libxml2 +zlib
+	DEPENDS:=+boinc +libstdcpp +libxml2 +zlib
 endef
 
 define Package/binary-radio-pulsar-search/description
@@ -67,7 +67,9 @@ define Build/Compile
 		$(PKG_BUILD_DIR)/src/erp_boinc_wrapper.cpp \
 		$(TARGET_LDFLAGS) -Wl,--as-needed \
 		-L$(STAGING_DIR)/usr/lib \
-		-lboinc_api -lboinc -lfftw3f -lgsl -lgslcblas -lxml2 -lz -ldl -lm -lpthread \
+		-lboinc_api -lboinc \
+		-Wl,-Bstatic -lfftw3f -lgsl -lgslcblas -Wl,-Bdynamic \
+		-lxml2 -lz -ldl -lm -lpthread \
 		-o $(PKG_BUILD_DIR)/build/einsteinbinary_openwrt_$(ARCH_PACKAGES)
 endef
 
