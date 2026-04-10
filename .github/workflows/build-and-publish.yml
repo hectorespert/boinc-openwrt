@@ -36,13 +36,27 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Decode signing key
+        env:
+          SIGNING_KEY: "${{ secrets.SIGNING_KEY }}"
+        run: |
+          if [ -n "$SIGNING_KEY" ]; then
+            DECODED=$(echo "$SIGNING_KEY" | base64 -d)
+            while IFS= read -r line; do
+              [ -n "$line" ] && echo "::add-mask::$line"
+            done <<< "$DECODED"
+            echo "PRIVATE_KEY<<EOF" >> "$GITHUB_ENV"
+            echo "$DECODED" >> "$GITHUB_ENV"
+            echo "EOF" >> "$GITHUB_ENV"
+          fi
+
       - name: Build APK packages with OpenWrt SDK action
         uses: openwrt/gh-action-sdk@v10
         env:
           ARCH: "${{ matrix.arch }}-openwrt-25.12"
           FEEDNAME: boinc_openwrt
           PACKAGES: "period-search"
-          PRIVATE_KEY: "${{ secrets.SIGNING_KEY }}"
+          PRIVATE_KEY: ${{ env.PRIVATE_KEY }}
           INDEX: 1
 
       - name: Upload packages artifact
