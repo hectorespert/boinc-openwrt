@@ -14,7 +14,7 @@ PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 
 PKG_LICENSE:=GPL-2.0-or-later
 PKG_BUILD_PARALLEL:=1
-PKG_BUILD_DEPENDS:=boinc fftw3/single gsl libxml2 zlib
+PKG_BUILD_DEPENDS:=boinc libfftw3f gsl libxml2 zlib
 BOINC_API_VERSION:=$(shell awk '/^#define BOINC_MAJOR_VERSION/ {maj=$$3} /^#define BOINC_MINOR_VERSION/ {min=$$3} /^#define BOINC_RELEASE/ {rel=$$3} END { if (maj != "" && min != "" && rel != "") printf "%s.%s.%s", maj, min, rel; else printf "7.21.0" }' $(STAGING_DIR)/usr/include/boinc/version.h 2>/dev/null)
 
 include $(INCLUDE_DIR)/package.mk
