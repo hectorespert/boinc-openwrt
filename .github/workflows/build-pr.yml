@@ -31,7 +31,7 @@ jobs:
         env:
           ARCH: "${{ matrix.arch }}-openwrt-25.12"
           FEEDNAME: boinc_openwrt
-          PACKAGES: "period-search"
+          PACKAGES: "period-search binary-radio-pulsar-search fftw3 gsl"
 
       - name: Upload packages artifact
         uses: actions/upload-artifact@v4
