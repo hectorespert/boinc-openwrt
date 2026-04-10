@@ -56,6 +56,7 @@ jobs:
           ARCH: "${{ matrix.arch }}-openwrt-25.12"
           FEEDNAME: boinc_openwrt
           PACKAGES: "period-search"
+          PRIVATE_KEY: ${{ env.PRIVATE_KEY }}
           INDEX: 1
 
       - name: Upload packages artifact
