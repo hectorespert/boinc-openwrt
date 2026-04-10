@@ -16,7 +16,6 @@ PKG_LICENSE:=GPL-2.0-or-later
 PKG_BUILD_PARALLEL:=1
 PKG_BUILD_DEPENDS:=boinc
 BOINC_API_VERSION:=$(shell awk '/^#define BOINC_MAJOR_VERSION/ {maj=$$3} /^#define BOINC_MINOR_VERSION/ {min=$$3} /^#define BOINC_RELEASE/ {rel=$$3} END { if (maj != "" && min != "" && rel != "") printf "%s.%s.%s", maj, min, rel; else printf "7.21.0" }' $(STAGING_DIR)/usr/include/boinc/version.h 2>/dev/null)
-BRP_APP_NAME:=BRP4
 
 include $(INCLUDE_DIR)/package.mk
 
@@ -31,9 +30,6 @@ endef
 define Package/binary-radio-pulsar-search/description
   Builds the Einstein@Home Binary Radio Pulsar Search CPU application
   and installs anonymous-platform files for BOINC.
-
-  Default app_name is BRP4; adjust BRP_APP_NAME if you need BRP4A,
-  BRP4G, BRP7, or another Einstein@Home BRP app family.
 endef
 
 define Build/Prepare
@@ -81,7 +77,6 @@ define Package/binary-radio-pulsar-search/install
 	$(CP) ./files/app_info.xml $(PKG_BUILD_DIR)/app_info.xml
 	$(SED) 's|einsteinbinary_openwrt_aarch64|einsteinbinary_openwrt_$(ARCH_PACKAGES)|g' $(PKG_BUILD_DIR)/app_info.xml
 	$(SED) 's|@BOINC_API_VERSION@|$(BOINC_API_VERSION)|g' $(PKG_BUILD_DIR)/app_info.xml
-	$(SED) 's|@EINSTEIN_APP_NAME@|$(BRP_APP_NAME)|g' $(PKG_BUILD_DIR)/app_info.xml
 	$(INSTALL_DATA) $(PKG_BUILD_DIR)/app_info.xml $(1)/opt/boinc/projects/einstein.phys.uwm.edu/
 endef
 
