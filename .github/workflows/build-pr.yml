@@ -21,6 +21,7 @@ jobs:
           - aarch64_cortex-a53
           - x86_64
           - mipsel_24kc
+          - mips_mips32
 
     steps:
       - name: Checkout repository
