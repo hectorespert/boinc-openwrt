@@ -29,6 +29,7 @@ jobs:
           - aarch64_cortex-a53
           - x86_64
           - mipsel_24kc
+          - mips_mips32
 
     steps:
       - name: Checkout repository
@@ -136,6 +137,7 @@ jobs:
               <li><a href="aarch64_cortex-a53/">aarch64_cortex-a53</a></li>
               <li><a href="x86_64/">x86_64</a></li>
               <li><a href="mipsel_24kc/">mipsel_24kc</a></li>
+              <li><a href="mips_mips32/">mips_mips32</a></li>
             </ul>
 
             <h2>Usage</h2>
@@ -158,7 +160,41 @@ jobs:
 
           # mipsel (e.g. many home routers)
           wget -P /etc/apk/keys/ https://hectorespert.github.io/boinc-openwrt/public-key.pem
-          apk add --repository https://hectorespert.github.io/boinc-openwrt/mipsel_24kc/packages.adb period-search binary-radio-pulsar-search</pre>
+          apk add --repository https://hectorespert.github.io/boinc-openwrt/mipsel_24kc/packages.adb period-search
+
+          # bmips/mips32 (e.g. Broadcom MIPS routers)
+          wget -P /etc/apk/keys/ https://hectorespert.github.io/boinc-openwrt/public-key.pem
+          apk add --repository https://hectorespert.github.io/boinc-openwrt/mips_mips32/packages.adb period-search</pre>
+
+            <h2>Add as custom feed</h2>
+            <p>
+              To permanently add this repository as a custom feed so you can install packages without
+              specifying <code>--repository</code> each time, follow the
+              <a href="https://openwrt.org/docs/guide-user/additional-software/apk#repository_feeds">OpenWrt APK repository feeds documentation</a>:
+            </p>
+
+            <p>Step 1 — trust the repository signing key (one-time setup):</p>
+            <pre>wget -P /etc/apk/keys/ https://hectorespert.github.io/boinc-openwrt/public-key.pem</pre>
+
+            <p>Step 2 — add the feed to <code>/etc/apk/repositories.d/customfeeds.list</code> (replace <code>ARCH</code> with your architecture):</p>
+            <pre>echo "https://hectorespert.github.io/boinc-openwrt/ARCH/packages.adb" >> /etc/apk/repositories.d/customfeeds.list</pre>
+
+            <p>Architecture-specific examples:</p>
+            <pre># aarch64 (e.g. Raspberry Pi 3/4 with OpenWrt)
+          echo "https://hectorespert.github.io/boinc-openwrt/aarch64_cortex-a53/packages.adb" >> /etc/apk/repositories.d/customfeeds.list
+
+          # x86_64 (e.g. PC/server)
+          echo "https://hectorespert.github.io/boinc-openwrt/x86_64/packages.adb" >> /etc/apk/repositories.d/customfeeds.list
+
+          # mipsel (e.g. many home routers)
+          echo "https://hectorespert.github.io/boinc-openwrt/mipsel_24kc/packages.adb" >> /etc/apk/repositories.d/customfeeds.list
+
+          # bmips/mips32 (e.g. Broadcom MIPS routers)
+          echo "https://hectorespert.github.io/boinc-openwrt/mips_mips32/packages.adb" >> /etc/apk/repositories.d/customfeeds.list</pre>
+
+            <p>Step 3 — update the package index and install:</p>
+            <pre>apk update
+          apk add period-search</pre>
 
             <p>
               Source code:
