@@ -4,7 +4,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=binary-radio-pulsar-search
-PKG_VERSION:=20260410
+PKG_VERSION:=20260411
 PKG_RELEASE:=1
 
 PKG_SOURCE:=brp-src-release.zip
@@ -24,7 +24,7 @@ define Package/binary-radio-pulsar-search
   CATEGORY:=Network
   TITLE:=Einstein@Home Binary Radio Pulsar Search custom BOINC app
   URL:=https://einsteinathome.org/es/source-license
-	DEPENDS:=+boinc +libstdcpp +libxml2 +zlib
+	DEPENDS:=+boinc +libstdcpp +zlib
 endef
 
 define Package/binary-radio-pulsar-search/description
@@ -68,8 +68,8 @@ define Build/Compile
 		$(TARGET_LDFLAGS) -Wl,--as-needed \
 		-L$(STAGING_DIR)/usr/lib \
 		-lboinc_api -lboinc \
-		-Wl,-Bstatic -lfftw3f -lgsl -lgslcblas -Wl,-Bdynamic \
-		-lxml2 -lz -ldl -lm -lpthread \
+		-Wl,-Bstatic -lfftw3f -lgsl -lgslcblas -lxml2 -Wl,-Bdynamic \
+		-lz -ldl -lm -lpthread \
 		-o $(PKG_BUILD_DIR)/build/einsteinbinary_openwrt_$(ARCH_PACKAGES)
 endef
 
