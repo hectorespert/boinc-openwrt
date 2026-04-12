@@ -1,0 +1,18 @@
+<app_info>
+<app>
+    <name>einsteinbinary_BRP4</name>
+</app>
+<file>
+    <name>einsteinbinary_openwrt_aarch64</name>
+    <executable/>
+</file>
+<app_version>
+    <app_name>einsteinbinary_BRP4</app_name>
+    <version_num>100</version_num>
+    <api_version>@BOINC_API_VERSION@</api_version>
+    <file_ref>
+        <file_name>einsteinbinary_openwrt_aarch64</file_name>
+        <main_program/>
+    </file_ref>
+</app_version>
+</app_info>

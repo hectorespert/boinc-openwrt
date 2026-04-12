@@ -56,7 +56,7 @@ jobs:
         env:
           ARCH: "${{ matrix.arch }}-openwrt-25.12"
           FEEDNAME: boinc_openwrt
-          PACKAGES: "period-search"
+          PACKAGES: "period-search binary-radio-pulsar-search fftw3 gsl libxml2-static"
           PRIVATE_KEY: ${{ env.PRIVATE_KEY }}
           INDEX: 1
 
@@ -129,6 +129,7 @@ jobs:
             <h2>Available packages</h2>
             <ul>
               <li><strong>period-search</strong> — Asteroids@home Period Search BOINC application</li>
+              <li><strong>binary-radio-pulsar-search</strong> — Einstein@Home Binary Radio Pulsar Search BOINC application (CPU)</li>
             </ul>
 
             <h2>Supported architectures</h2>
@@ -146,16 +147,16 @@ jobs:
             <pre>wget -P /etc/apk/keys/ https://hectorespert.github.io/boinc-openwrt/public-key.pem</pre>
 
             <p>Step 2 — install packages:</p>
-            <pre>apk add --repository https://hectorespert.github.io/boinc-openwrt/ARCH/packages.adb period-search</pre>
+            <pre>apk add --repository https://hectorespert.github.io/boinc-openwrt/ARCH/packages.adb period-search binary-radio-pulsar-search</pre>
 
             <p>Architecture-specific examples:</p>
             <pre># aarch64 (e.g. Raspberry Pi 3/4 with OpenWrt)
           wget -P /etc/apk/keys/ https://hectorespert.github.io/boinc-openwrt/public-key.pem
-          apk add --repository https://hectorespert.github.io/boinc-openwrt/aarch64_cortex-a53/packages.adb period-search
+            apk add --repository https://hectorespert.github.io/boinc-openwrt/aarch64_cortex-a53/packages.adb period-search binary-radio-pulsar-search
 
           # x86_64 (e.g. PC/server)
           wget -P /etc/apk/keys/ https://hectorespert.github.io/boinc-openwrt/public-key.pem
-          apk add --repository https://hectorespert.github.io/boinc-openwrt/x86_64/packages.adb period-search
+          apk add --repository https://hectorespert.github.io/boinc-openwrt/x86_64/packages.adb period-search binary-radio-pulsar-search
 
           # mipsel (e.g. many home routers)
           wget -P /etc/apk/keys/ https://hectorespert.github.io/boinc-openwrt/public-key.pem
