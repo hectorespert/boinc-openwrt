@@ -25,6 +25,7 @@ jobs:
           - x86_64
           - mipsel_24kc
           - mips_mips32
+          - riscv64_riscv64
 
     steps:
       - name: Checkout repository
