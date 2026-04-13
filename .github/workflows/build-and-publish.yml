@@ -33,7 +33,7 @@ jobs:
           - x86_64
           - mipsel_24kc
           - mips_mips32
-          - riscv64_riscv64
+          - riscv64_default
 
     steps:
       - name: Checkout repository
@@ -145,7 +145,7 @@ jobs:
               <li><a href="x86_64/">x86_64</a></li>
               <li><a href="mipsel_24kc/">mipsel_24kc</a></li>
               <li><a href="mips_mips32/">mips_mips32</a></li>
-              <li><a href="riscv64_riscv64/">riscv64_riscv64</a></li>
+              <li><a href="riscv64_default/">riscv64_default</a></li>
             </ul>
 
             <h2>Usage</h2>
@@ -188,7 +188,7 @@ jobs:
 
           # riscv64 (e.g. generic RISC-V 64-bit device)
           wget -P /etc/apk/keys/ https://hectorespert.github.io/boinc-openwrt/public-key.pem
-          apk add --repository https://hectorespert.github.io/boinc-openwrt/riscv64_riscv64/packages.adb period-search binary-radio-pulsar-search</pre>
+          apk add --repository https://hectorespert.github.io/boinc-openwrt/riscv64_default/packages.adb period-search binary-radio-pulsar-search</pre>
 
             <h2>Add as custom feed</h2>
             <p>
@@ -226,7 +226,7 @@ jobs:
           echo "https://hectorespert.github.io/boinc-openwrt/mips_mips32/packages.adb" >> /etc/apk/repositories.d/customfeeds.list
 
           # riscv64 (e.g. generic RISC-V 64-bit device)
-          echo "https://hectorespert.github.io/boinc-openwrt/riscv64_riscv64/packages.adb" >> /etc/apk/repositories.d/customfeeds.list</pre>
+          echo "https://hectorespert.github.io/boinc-openwrt/riscv64_default/packages.adb" >> /etc/apk/repositories.d/customfeeds.list</pre>
 
             <p>Step 3 — update the package index and install:</p>
             <pre>apk update
