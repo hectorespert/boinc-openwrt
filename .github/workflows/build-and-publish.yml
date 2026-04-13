@@ -27,6 +27,9 @@ jobs:
       matrix:
         arch:
           - aarch64_cortex-a53
+          - aarch64_cortex-a72
+          - aarch64_cortex-a76
+          - aarch64_generic
           - x86_64
           - mipsel_24kc
           - mips_mips32
@@ -135,6 +138,9 @@ jobs:
             <h2>Supported architectures</h2>
             <ul>
               <li><a href="aarch64_cortex-a53/">aarch64_cortex-a53</a></li>
+              <li><a href="aarch64_cortex-a72/">aarch64_cortex-a72</a></li>
+              <li><a href="aarch64_cortex-a76/">aarch64_cortex-a76</a></li>
+              <li><a href="aarch64_generic/">aarch64_generic</a></li>
               <li><a href="x86_64/">x86_64</a></li>
               <li><a href="mipsel_24kc/">mipsel_24kc</a></li>
               <li><a href="mips_mips32/">mips_mips32</a></li>
@@ -150,9 +156,21 @@ jobs:
             <pre>apk add --repository https://hectorespert.github.io/boinc-openwrt/ARCH/packages.adb period-search binary-radio-pulsar-search</pre>
 
             <p>Architecture-specific examples:</p>
-            <pre># aarch64 (e.g. Raspberry Pi 3/4 with OpenWrt)
+            <pre># aarch64 Cortex-A53 (e.g. Raspberry Pi 3 with OpenWrt)
           wget -P /etc/apk/keys/ https://hectorespert.github.io/boinc-openwrt/public-key.pem
             apk add --repository https://hectorespert.github.io/boinc-openwrt/aarch64_cortex-a53/packages.adb period-search binary-radio-pulsar-search
+
+          # aarch64 Cortex-A72 (e.g. Raspberry Pi 4 with OpenWrt)
+          wget -P /etc/apk/keys/ https://hectorespert.github.io/boinc-openwrt/public-key.pem
+          apk add --repository https://hectorespert.github.io/boinc-openwrt/aarch64_cortex-a72/packages.adb period-search binary-radio-pulsar-search
+
+          # aarch64 Cortex-A76 (e.g. Raspberry Pi 5 with OpenWrt)
+          wget -P /etc/apk/keys/ https://hectorespert.github.io/boinc-openwrt/public-key.pem
+          apk add --repository https://hectorespert.github.io/boinc-openwrt/aarch64_cortex-a76/packages.adb period-search binary-radio-pulsar-search
+
+          # aarch64 generic (e.g. generic ARM64 device)
+          wget -P /etc/apk/keys/ https://hectorespert.github.io/boinc-openwrt/public-key.pem
+          apk add --repository https://hectorespert.github.io/boinc-openwrt/aarch64_generic/packages.adb period-search binary-radio-pulsar-search
 
           # x86_64 (e.g. PC/server)
           wget -P /etc/apk/keys/ https://hectorespert.github.io/boinc-openwrt/public-key.pem
@@ -180,8 +198,17 @@ jobs:
             <pre>echo "https://hectorespert.github.io/boinc-openwrt/ARCH/packages.adb" >> /etc/apk/repositories.d/customfeeds.list</pre>
 
             <p>Architecture-specific examples:</p>
-            <pre># aarch64 (e.g. Raspberry Pi 3/4 with OpenWrt)
+            <pre># aarch64 Cortex-A53 (e.g. Raspberry Pi 3 with OpenWrt)
           echo "https://hectorespert.github.io/boinc-openwrt/aarch64_cortex-a53/packages.adb" >> /etc/apk/repositories.d/customfeeds.list
+
+          # aarch64 Cortex-A72 (e.g. Raspberry Pi 4 with OpenWrt)
+          echo "https://hectorespert.github.io/boinc-openwrt/aarch64_cortex-a72/packages.adb" >> /etc/apk/repositories.d/customfeeds.list
+
+          # aarch64 Cortex-A76 (e.g. Raspberry Pi 5 with OpenWrt)
+          echo "https://hectorespert.github.io/boinc-openwrt/aarch64_cortex-a76/packages.adb" >> /etc/apk/repositories.d/customfeeds.list
+
+          # aarch64 generic (e.g. generic ARM64 device)
+          echo "https://hectorespert.github.io/boinc-openwrt/aarch64_generic/packages.adb" >> /etc/apk/repositories.d/customfeeds.list
 
           # x86_64 (e.g. PC/server)
           echo "https://hectorespert.github.io/boinc-openwrt/x86_64/packages.adb" >> /etc/apk/repositories.d/customfeeds.list
