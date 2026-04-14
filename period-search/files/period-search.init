@@ -1,0 +1,18 @@
+#!/bin/sh /etc/rc.common
+
+START=98
+STOP=10
+
+PROJECTDIR=/opt/boinc/projects/asteroidsathome.net_boinc
+APPDIR=/opt/period-search
+BOINCUSR=boinc
+
+start() {
+	mkdir -p "$PROJECTDIR"
+	chown "$BOINCUSR:$BOINCUSR" "$PROJECTDIR"
+	for f in "$APPDIR"/*; do
+		[ -e "$f" ] || continue
+		ln -sf "$f" "$PROJECTDIR/$(basename "$f")"
+		chown -h "$BOINCUSR:$BOINCUSR" "$PROJECTDIR/$(basename "$f")"
+	done
+}

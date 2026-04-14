@@ -22,7 +22,7 @@ include $(INCLUDE_DIR)/package.mk
 define Package/binary-radio-pulsar-search
   SECTION:=net
   CATEGORY:=Network
-  TITLE:=Einstein@Home Binary Radio Pulsar Search custom BOINC app
+  TITLE:=Einstein@Home Binary Radio Pulsar Search OpenWrt application
   URL:=https://einsteinathome.org/es/source-license
 	DEPENDS:=+boinc +libstdcpp +zlib
 endef

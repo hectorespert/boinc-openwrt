@@ -4,7 +4,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=period-search
-PKG_VERSION:=20260402
+PKG_VERSION:=20260414
 PKG_RELEASE:=1
 
 PKG_SOURCE:=dev.tar.gz
@@ -23,7 +23,7 @@ include $(INCLUDE_DIR)/package.mk
 define Package/period-search
   SECTION:=net
   CATEGORY:=Network
-	TITLE:=Asteroids@home Period Search custom BOINC app (dev)
+	TITLE:=Asteroids@home Period Search OpenWrt application
 	URL:=https://github.com/AsteroidsAtHome/PeriodSearch/tree/dev
   DEPENDS:=+boinc +libstdcpp
 endef
@@ -181,12 +181,22 @@ define Build/Compile
 endef
 
 define Package/period-search/install
-	$(INSTALL_DIR) $(1)/opt/boinc/projects/asteroidsathome.net_boinc
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/build/period_search_openwrt_$(ARCH_PACKAGES) $(1)/opt/boinc/projects/asteroidsathome.net_boinc/
+	$(INSTALL_DIR) $(1)/opt/period-search
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/build/period_search_openwrt_$(ARCH_PACKAGES) $(1)/opt/period-search/
 	$(CP) ./files/app_info.xml $(PKG_BUILD_DIR)/app_info.xml
 	$(SED) 's|period_search_openwrt_aarch64|period_search_openwrt_$(ARCH_PACKAGES)|g' $(PKG_BUILD_DIR)/app_info.xml
 	$(SED) 's|@BOINC_API_VERSION@|$(BOINC_API_VERSION)|g' $(PKG_BUILD_DIR)/app_info.xml
-	$(INSTALL_DATA) $(PKG_BUILD_DIR)/app_info.xml $(1)/opt/boinc/projects/asteroidsathome.net_boinc/
+	$(INSTALL_DATA) $(PKG_BUILD_DIR)/app_info.xml $(1)/opt/period-search/
+	$(INSTALL_DIR) $(1)/etc/init.d
+	$(INSTALL_BIN) ./files/period-search.init $(1)/etc/init.d/period-search
+endef
+
+define Package/period-search/postinst
+#!/bin/sh
+[ -n "$${IPKG_INSTROOT}" ] && exit 0
+/etc/init.d/period-search enable
+/etc/init.d/period-search start
+exit 0
 endef
 
 $(eval $(call BuildPackage,period-search))
