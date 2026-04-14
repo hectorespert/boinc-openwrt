@@ -5,7 +5,7 @@
 
 include $(TOPDIR)/rules.mk
 
-PKG_NAME:=boinc
+PKG_NAME:=boinc-upstream
 PKG_VERSION:=8.2.9
 PKG_VERSION_SHORT:=$(shell echo $(PKG_VERSION)| cut -f1,2 -d.)
 PKG_RELEASE:=1
@@ -27,16 +27,21 @@ PKG_FIXUP:=autoreconf
 include $(INCLUDE_DIR)/package.mk
 include $(INCLUDE_DIR)/target.mk
 
-define Package/boinc
+define Package/boinc-upstream
   SECTION:=net
   CATEGORY:=Network
-  TITLE:=BOINC client
+  TITLE:=BOINC client (upstream)
   DEPENDS:=+curl +bzip2 +libstdcpp +libopenssl +zlib
+  PROVIDES:=boinc
   USERID:=boinc:boinc
   URL:=https://github.com/BOINC/boinc/
 endef
 
-define Package/boinc/description
+define Package/boinc-upstream/description
+  This package tracks the upstream BOINC project releases directly and is
+  intended as a drop-in replacement for the boinc package provided by the
+  official OpenWrt feed.
+
   The Berkeley Open Infrastructure for Network Computing (BOINC) is a
   software platform for distributed computing: several initiatives of
   various scientific disciplines all compete for the idle time of
@@ -66,7 +71,7 @@ define Build/InstallDev
 	$(CP) $(PKG_INSTALL_DIR)/usr/lib/*.a $(1)/usr/lib/
 endef
 
-define Package/boinc/install
+define Package/boinc-upstream/install
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/bin/* $(1)/usr/bin/
 	$(INSTALL_DIR) $(1)/usr/lib
@@ -79,4 +84,4 @@ define Package/boinc/install
 	$(CP) ./files/remote_hosts.cfg $(1)/usr/share/boinc/remote_hosts.cfg
 endef
 
-$(eval $(call BuildPackage,boinc))
+$(eval $(call BuildPackage,boinc-upstream))
