@@ -4,7 +4,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=binary-radio-pulsar-search
-PKG_VERSION:=20260411
+PKG_VERSION:=20260414
 PKG_RELEASE:=1
 
 PKG_SOURCE:=brp-src-release.zip
@@ -74,12 +74,22 @@ define Build/Compile
 endef
 
 define Package/binary-radio-pulsar-search/install
-	$(INSTALL_DIR) $(1)/opt/boinc/projects/einstein.phys.uwm.edu
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/build/einsteinbinary_openwrt_$(ARCH_PACKAGES) $(1)/opt/boinc/projects/einstein.phys.uwm.edu/
+	$(INSTALL_DIR) $(1)/opt/binary-radio-pulsar-search
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/build/einsteinbinary_openwrt_$(ARCH_PACKAGES) $(1)/opt/binary-radio-pulsar-search/
 	$(CP) ./files/app_info.xml $(PKG_BUILD_DIR)/app_info.xml
 	$(SED) 's|einsteinbinary_openwrt_aarch64|einsteinbinary_openwrt_$(ARCH_PACKAGES)|g' $(PKG_BUILD_DIR)/app_info.xml
 	$(SED) 's|@BOINC_API_VERSION@|$(BOINC_API_VERSION)|g' $(PKG_BUILD_DIR)/app_info.xml
-	$(INSTALL_DATA) $(PKG_BUILD_DIR)/app_info.xml $(1)/opt/boinc/projects/einstein.phys.uwm.edu/
+	$(INSTALL_DATA) $(PKG_BUILD_DIR)/app_info.xml $(1)/opt/binary-radio-pulsar-search/
+	$(INSTALL_DIR) $(1)/etc/init.d
+	$(INSTALL_BIN) ./files/binary-radio-pulsar-search.init $(1)/etc/init.d/binary-radio-pulsar-search
+endef
+
+define Package/binary-radio-pulsar-search/postinst
+#!/bin/sh
+[ -n "$${IPKG_INSTROOT}" ] && exit 0
+/etc/init.d/binary-radio-pulsar-search enable
+/etc/init.d/binary-radio-pulsar-search start
+exit 0
 endef
 
 $(eval $(call BuildPackage,binary-radio-pulsar-search))

@@ -1,0 +1,17 @@
+#!/bin/sh /etc/rc.common
+
+START=98
+
+PROJECTDIR=/opt/boinc/projects/einstein.phys.uwm.edu
+APPDIR=/opt/binary-radio-pulsar-search
+BOINCUSR=boinc
+
+start() {
+	mkdir -p "$PROJECTDIR"
+	chown "$BOINCUSR:$BOINCUSR" "$PROJECTDIR"
+	for f in "$APPDIR"/*; do
+		[ -e "$f" ] || continue
+		ln -sf "$f" "$PROJECTDIR/$(basename "$f")"
+		chown -h "$BOINCUSR:$BOINCUSR" "$PROJECTDIR/$(basename "$f")"
+	done
+}
