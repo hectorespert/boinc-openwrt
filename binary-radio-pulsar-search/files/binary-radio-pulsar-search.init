@@ -11,7 +11,7 @@ start() {
 	chown "$BOINCUSR:$BOINCUSR" "$PROJECTDIR"
 	for f in "$APPDIR"/*; do
 		[ -e "$f" ] || continue
-		ln -sf "$f" "$PROJECTDIR/$(basename "$f")"
-		chown -h "$BOINCUSR:$BOINCUSR" "$PROJECTDIR/$(basename "$f")"
+		cp -p "$f" "$PROJECTDIR/$(basename "$f")"
+		chown "$BOINCUSR:$BOINCUSR" "$PROJECTDIR/$(basename "$f")"
 	done
 }
