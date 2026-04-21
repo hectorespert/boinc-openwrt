@@ -4,6 +4,7 @@ Custom [OpenWrt](https://openwrt.org/) package repository providing [BOINC](http
 
 ## Available packages
 
+- **boinc-upstream** — BOINC client (upstream, tracks BOINC releases directly)
 - **period-search** — Asteroids@home Period Search BOINC application
 - **binary-radio-pulsar-search** — Einstein@Home Binary Radio Pulsar Search BOINC application (CPU)
 
