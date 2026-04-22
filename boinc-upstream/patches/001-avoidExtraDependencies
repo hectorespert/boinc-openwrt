@@ -1,8 +1,6 @@
-Index: boinc-upstream-8.2.11/configure.ac
-===================================================================
---- boinc-upstream-8.2.11.orig/configure.ac
-+++ boinc-upstream-8.2.11/configure.ac
-@@ -624,8 +624,10 @@
+--- a/configure.ac
++++ b/configure.ac
+@@ -624,8 +624,10 @@ SAH_CHECK_LIB([dl], [dlopen],
      [BOINC_EXTRA_LIBS="${BOINC_EXTRA_LIBS} ${sah_lib_last}"])
  SAH_CHECK_LIB([nsl], [gethostbyname],
      [BOINC_EXTRA_LIBS="${BOINC_EXTRA_LIBS} ${sah_lib_last}"])
