@@ -1,6 +1,6 @@
 --- a/client/hostinfo_unix.cpp
 +++ b/client/hostinfo_unix.cpp
-@@ -1679,12 +1679,14 @@ int get_libc_version(string& version, string&) {
+@@ -1679,12 +1679,15 @@ int get_libc_version(string& version, string&) {
  }
  #else
  int get_libc_version(string& version, string& extra_info) {
@@ -11,7 +11,8 @@
      if (f) {
          char* retval = fgets(buf, sizeof(buf), f);
          strbuf = (string)buf;
-+        if (fgets(buf, sizeof(buf), f)) strbuf2 = (string)buf;
++        char* retval2 = fgets(buf, sizeof(buf), f);
++        if (retval2) strbuf2 = (string)buf;
          while (fgets(buf, sizeof(buf), f)) {
              // consume output to allow command to exit gracefully
          }
@@ -25,7 +26,7 @@
 +        if (strbuf.find("musl libc") == 0) {
 +            // musl reports the version in the second line:
 +            // Version X.Y.Z
-+            if (strbuf2.find("Version ") == 0) {
++            if (strbuf2.find("Version ") == 0 && strbuf2.size() > 8) {
 +                version = strbuf2.substr(8);
 +                extra_info = strbuf;
 +                return BOINC_SUCCESS;
