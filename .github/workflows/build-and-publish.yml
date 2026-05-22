@@ -243,6 +243,67 @@ jobs:
           </html>
           EOF
 
+      - name: Generate robots.txt
+        run: |
+          cat > site/robots.txt << 'EOF'
+          User-agent: *
+          Allow: /
+          Sitemap: https://hectorespert.github.io/boinc-openwrt/sitemap.xml
+          EOF
+
+      - name: Generate sitemap.xml
+        run: |
+          cat > site/sitemap.xml << 'EOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+            <url>
+              <loc>https://hectorespert.github.io/boinc-openwrt/</loc>
+              <changefreq>weekly</changefreq>
+              <priority>1.0</priority>
+            </url>
+            <url>
+              <loc>https://hectorespert.github.io/boinc-openwrt/aarch64_cortex-a53/</loc>
+              <changefreq>weekly</changefreq>
+              <priority>0.8</priority>
+            </url>
+            <url>
+              <loc>https://hectorespert.github.io/boinc-openwrt/aarch64_cortex-a72/</loc>
+              <changefreq>weekly</changefreq>
+              <priority>0.8</priority>
+            </url>
+            <url>
+              <loc>https://hectorespert.github.io/boinc-openwrt/aarch64_cortex-a76/</loc>
+              <changefreq>weekly</changefreq>
+              <priority>0.8</priority>
+            </url>
+            <url>
+              <loc>https://hectorespert.github.io/boinc-openwrt/aarch64_generic/</loc>
+              <changefreq>weekly</changefreq>
+              <priority>0.8</priority>
+            </url>
+            <url>
+              <loc>https://hectorespert.github.io/boinc-openwrt/x86_64/</loc>
+              <changefreq>weekly</changefreq>
+              <priority>0.8</priority>
+            </url>
+            <url>
+              <loc>https://hectorespert.github.io/boinc-openwrt/mipsel_24kc/</loc>
+              <changefreq>weekly</changefreq>
+              <priority>0.8</priority>
+            </url>
+            <url>
+              <loc>https://hectorespert.github.io/boinc-openwrt/mips_mips32/</loc>
+              <changefreq>weekly</changefreq>
+              <priority>0.8</priority>
+            </url>
+            <url>
+              <loc>https://hectorespert.github.io/boinc-openwrt/riscv64_generic/</loc>
+              <changefreq>weekly</changefreq>
+              <priority>0.8</priority>
+            </url>
+          </urlset>
+          EOF
+
       - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
