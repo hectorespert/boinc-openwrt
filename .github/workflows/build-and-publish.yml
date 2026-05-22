@@ -243,6 +243,35 @@ jobs:
           </html>
           EOF
 
+      - name: Generate robots.txt
+        run: |
+          cat > site/robots.txt << 'EOF'
+          User-agent: *
+          Allow: /
+          Sitemap: https://hectorespert.github.io/boinc-openwrt/sitemap.xml
+          EOF
+
+      - name: Generate sitemap.xml
+        run: |
+          {
+            echo '<?xml version="1.0" encoding="UTF-8"?>'
+            echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
+            echo '  <url>'
+            echo '    <loc>https://hectorespert.github.io/boinc-openwrt/</loc>'
+            echo '    <changefreq>weekly</changefreq>'
+            echo '    <priority>1.0</priority>'
+            echo '  </url>'
+            for arch_dir in site/*/; do
+              arch=$(basename "$arch_dir")
+              echo '  <url>'
+              echo "    <loc>https://hectorespert.github.io/boinc-openwrt/${arch}/</loc>"
+              echo '    <changefreq>weekly</changefreq>'
+              echo '    <priority>0.8</priority>'
+              echo '  </url>'
+            done
+            echo '</urlset>'
+          } > site/sitemap.xml
+
       - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
