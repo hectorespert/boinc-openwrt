@@ -31,7 +31,7 @@ define Package/boinc-upstream
   SECTION:=net
   CATEGORY:=Network
   TITLE:=BOINC client (upstream)
-  DEPENDS:=+curl +bzip2 +libstdcpp +libopenssl +zlib
+  DEPENDS:=+curl +bzip2 +libstdcpp +libopenssl +zlib +coreutils-stat
   PROVIDES:=boinc
   USERID:=boinc:boinc
   URL:=https://github.com/BOINC/boinc/
