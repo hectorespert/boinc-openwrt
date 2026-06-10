@@ -8,7 +8,7 @@ include $(TOPDIR)/rules.mk
 PKG_NAME:=boinc-upstream
 PKG_VERSION:=8.2.11
 PKG_VERSION_SHORT:=$(shell echo $(PKG_VERSION)| cut -f1,2 -d.)
-PKG_RELEASE:=2
+PKG_RELEASE:=3
 
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/BOINC/boinc
@@ -31,7 +31,7 @@ define Package/boinc-upstream
   SECTION:=net
   CATEGORY:=Network
   TITLE:=BOINC client (upstream)
-  DEPENDS:=+curl +bzip2 +libstdcpp +libopenssl +zlib
+  DEPENDS:=+curl +bzip2 +libstdcpp +libopenssl +zlib +coreutils-stat
   PROVIDES:=boinc
   USERID:=boinc:boinc
   URL:=https://github.com/BOINC/boinc/
