@@ -56,6 +56,7 @@ start_service() {
    procd_add_jail_mount /etc/os-release
    procd_add_jail_mount $PRESETDIR
    procd_add_jail_mount_rw $BOINCDIR
+   procd_add_jail_mount /usr/bin/stat
 
    procd_close_instance
 }
