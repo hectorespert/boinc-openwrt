@@ -82,6 +82,8 @@ define Package/boinc-upstream/install
 	$(INSTALL_DIR) $(1)/usr/share/boinc
 	$(CP) ./files/global_prefs_override.xml $(1)/usr/share/boinc/global_prefs_override.xml
 	$(CP) ./files/remote_hosts.cfg $(1)/usr/share/boinc/remote_hosts.cfg
+	$(INSTALL_DIR) $(1)/etc/apparmor.d
+	$(INSTALL_DATA) ./files/apparmor.d/usr.bin.boinc_client $(1)/etc/apparmor.d/usr.bin.boinc_client
 endef
 
 $(eval $(call BuildPackage,boinc-upstream))
