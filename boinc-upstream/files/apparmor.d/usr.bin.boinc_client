@@ -23,13 +23,15 @@
   # Own executable
   /usr/bin/boinc_client mr,
 
-  # Shared libraries
+  # Shared libraries (mmap+read only; no arbitrary binary execution)
   /usr/lib/                r,
-  /usr/lib/**             mr,
+  /usr/lib/lib*.so*       mr,
 
   # BOINC data directory (read-write; work units and results live here)
+  # Link creation (l) is needed for slot-directory symlink management.
   /opt/boinc/              rw,
-  /opt/boinc/**           rwkl,
+  /opt/boinc/**           rwk,
+  /opt/boinc/slots/**     rwkl,
 
   # Preset / shared configuration files (read-only)
   /usr/share/boinc/        r,
@@ -61,9 +63,9 @@
   /etc/os-release          r,
   /usr/lib/os-release      r,
 
-  # Temporary files used during computation
-  /tmp/                    r,
-  /tmp/**                 rwkl,
+  # Temporary files used during computation (restricted to BOINC-owned prefix)
+  /tmp/boinc*/            rwk,
+  /tmp/boinc*/**         rwk,
 
   # Deny write access to sensitive system files
   deny /etc/passwd         w,
