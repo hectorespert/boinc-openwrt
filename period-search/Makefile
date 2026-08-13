@@ -7,10 +7,10 @@ PKG_NAME:=period-search
 PKG_VERSION:=20260414
 PKG_RELEASE:=1
 
-PKG_SOURCE:=dev.tar.gz
+PKG_SOURCE:=main.tar.gz
 PKG_SOURCE_URL:=https://github.com/AsteroidsAtHome/PeriodSearch/archive/refs/heads
-PKG_HASH:=7d84cb833ad7a8bc9e48e4da798bc43847477e45147edac0dc9c0703563f06b7
-PKG_BUILD_DIR:=$(BUILD_DIR)/PeriodSearch-dev
+PKG_HASH:=83ebea305ad16c627425f06237c9c0da46b54eb9c7e7dbd96139ea0aecafc746
+PKG_BUILD_DIR:=$(BUILD_DIR)/PeriodSearch-main
 
 PKG_LICENSE:=GPL-3.0-or-later
 PKG_LICENSE_FILES:=LICENSE
@@ -24,13 +24,13 @@ define Package/period-search
   SECTION:=net
   CATEGORY:=Network
 	TITLE:=Asteroids@home Period Search OpenWrt application
-	URL:=https://github.com/AsteroidsAtHome/PeriodSearch/tree/dev
+	URL:=https://github.com/AsteroidsAtHome/PeriodSearch/tree/main
   DEPENDS:=+boinc +libstdcpp
 endef
 
 define Package/period-search/description
 	Builds the OpenWrt Period Search executable from Asteroids@home
-	dev branch snapshot and installs files for anonymous-platform usage in BOINC.
+	main branch snapshot and installs files for anonymous-platform usage in BOINC.
 endef
 
 define Build/Configure
