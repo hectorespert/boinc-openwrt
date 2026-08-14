@@ -4,12 +4,12 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=period-search
-PKG_VERSION:=20260414
+PKG_VERSION:=20260814
 PKG_RELEASE:=1
 
 PKG_SOURCE:=dev.tar.gz
 PKG_SOURCE_URL:=https://github.com/AsteroidsAtHome/PeriodSearch/archive/refs/heads
-PKG_HASH:=7d84cb833ad7a8bc9e48e4da798bc43847477e45147edac0dc9c0703563f06b7
+PKG_HASH:=534202a0c6bbfa739f806c0df6b36b37d7f9dbbfb5ce8bb97a2894bd16d8d7b6
 PKG_BUILD_DIR:=$(BUILD_DIR)/PeriodSearch-dev
 
 PKG_LICENSE:=GPL-3.0-or-later

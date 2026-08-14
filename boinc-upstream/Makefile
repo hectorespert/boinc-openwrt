@@ -6,14 +6,14 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=boinc-upstream
-PKG_VERSION:=8.2.11
+PKG_VERSION:=8.2.15
 PKG_VERSION_SHORT:=$(shell echo $(PKG_VERSION)| cut -f1,2 -d.)
-PKG_RELEASE:=3
+PKG_RELEASE:=1
 
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/BOINC/boinc
 PKG_SOURCE_VERSION:=client_release/$(PKG_VERSION_SHORT)/$(PKG_VERSION)
-PKG_MIRROR_HASH:=40df51e88f3d077112343e55906e42ce07d43fc682b24e8343d36263d235bdfb
+PKG_MIRROR_HASH:=e922e2b43cc3236b68ae2e64a8d052e2c28cde83c715d793247bbaa3189a2afd
 
 PKG_MAINTAINER:=Christian Dreihsig <christian.dreihsig@t-online.de>, Steffen Moeller <moeller@debian.org>
 PKG_LICENSE:=GPL-3.0-or-later
