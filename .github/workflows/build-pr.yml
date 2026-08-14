@@ -39,7 +39,7 @@ jobs:
           PACKAGES: "boinc-upstream period-search binary-radio-pulsar-search fftw3 gsl libxml2-static"
 
       - name: Upload packages artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: packages-${{ matrix.arch }}
           path: bin/packages/${{ matrix.arch }}/boinc_openwrt/
