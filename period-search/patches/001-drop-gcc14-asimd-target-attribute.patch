@@ -1,0 +1,16 @@
+--- a/period_search_optimization_simd/period_search/gauss_errc_asimd.cpp
++++ b/period_search_optimization_simd/period_search/gauss_errc_asimd.cpp
+@@ -7,13 +7,6 @@
+ #include "declarations.h"
+ #include "CalcStrategyAsimd.hpp"
+ 
+-#if defined __GNUG__ && !defined __clang__
+-__attribute__((__target__("arch=armv8-a+simd")))
+-#elif defined __GNUG__ && __clang__
+-// NOTE: The following generates warning: unsupported architecture 'armv8-a+simd' in the 'target' attribute string; 'target' attribute ignored [-Wignored-attributes]
+-// __attribute__((target("arch=armv8-a+simd")))
+-#endif
+-
+ /**
+ * @brief Solves a linear system of equations using Gaussian elimination with partial pivoting.
+ *
