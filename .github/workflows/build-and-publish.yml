@@ -56,7 +56,7 @@ jobs:
           fi
 
       - name: Build APK packages with OpenWrt SDK action
-        uses: openwrt/gh-action-sdk@v10
+        uses: openwrt/gh-action-sdk@v11
         env:
           ARCH: "${{ matrix.arch }}-openwrt-25.12"
           FEEDNAME: boinc_openwrt
