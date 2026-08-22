@@ -30,9 +30,10 @@ jobs:
           - aarch64_cortex-a72
           - aarch64_cortex-a76
           - aarch64_generic
+          - arm_cortex-a7_neon-vfpv4
+          - arm_cortex-a9_vfpv3-d16
+          - arm_cortex-a15_neon-vfpv4
           - x86_64
-          - mipsel_24kc
-          - mips_mips32
           - riscv64_generic
 
     steps:
@@ -137,15 +138,23 @@ jobs:
               <li><strong>binary-radio-pulsar-search</strong> — Einstein@Home Binary Radio Pulsar Search BOINC application (CPU)</li>
             </ul>
 
+            <p>
+              MIPS architectures are deliberately not built. Neither <code>24Kc</code> nor
+              <code>mips32</code> has an FPU, so OpenWrt builds them soft-float and every
+              floating-point operation is emulated. The science applications are
+              double-precision bound, so a workunit would never finish inside its deadline.
+            </p>
+
             <h2>Supported architectures</h2>
             <ul>
               <li><a href="aarch64_cortex-a53/">aarch64_cortex-a53</a></li>
               <li><a href="aarch64_cortex-a72/">aarch64_cortex-a72</a></li>
               <li><a href="aarch64_cortex-a76/">aarch64_cortex-a76</a></li>
               <li><a href="aarch64_generic/">aarch64_generic</a></li>
+              <li><a href="arm_cortex-a7_neon-vfpv4/">arm_cortex-a7_neon-vfpv4</a></li>
+              <li><a href="arm_cortex-a9_vfpv3-d16/">arm_cortex-a9_vfpv3-d16</a></li>
+              <li><a href="arm_cortex-a15_neon-vfpv4/">arm_cortex-a15_neon-vfpv4</a></li>
               <li><a href="x86_64/">x86_64</a></li>
-              <li><a href="mipsel_24kc/">mipsel_24kc</a></li>
-              <li><a href="mips_mips32/">mips_mips32</a></li>
               <li><a href="riscv64_generic/">riscv64_generic</a></li>
             </ul>
 
@@ -161,7 +170,7 @@ jobs:
             <p>Architecture-specific examples:</p>
             <pre># aarch64 Cortex-A53 (e.g. Raspberry Pi 3 with OpenWrt)
           wget -P /etc/apk/keys/ https://hectorespert.github.io/boinc-openwrt/public-key.pem
-            apk add --repository https://hectorespert.github.io/boinc-openwrt/aarch64_cortex-a53/packages.adb boinc-upstream period-search binary-radio-pulsar-search
+          apk add --repository https://hectorespert.github.io/boinc-openwrt/aarch64_cortex-a53/packages.adb boinc-upstream period-search binary-radio-pulsar-search
 
           # aarch64 Cortex-A72 (e.g. Raspberry Pi 4 with OpenWrt)
           wget -P /etc/apk/keys/ https://hectorespert.github.io/boinc-openwrt/public-key.pem
@@ -175,17 +184,21 @@ jobs:
           wget -P /etc/apk/keys/ https://hectorespert.github.io/boinc-openwrt/public-key.pem
           apk add --repository https://hectorespert.github.io/boinc-openwrt/aarch64_generic/packages.adb boinc-upstream period-search binary-radio-pulsar-search
 
+          # armv7 Cortex-A7 (e.g. Banana Pi R2, MediaTek MT7623)
+          wget -P /etc/apk/keys/ https://hectorespert.github.io/boinc-openwrt/public-key.pem
+          apk add --repository https://hectorespert.github.io/boinc-openwrt/arm_cortex-a7_neon-vfpv4/packages.adb boinc-upstream period-search binary-radio-pulsar-search
+
+          # armv7 Cortex-A9 (e.g. Turris Omnia, Linksys WRT1900AC)
+          wget -P /etc/apk/keys/ https://hectorespert.github.io/boinc-openwrt/public-key.pem
+          apk add --repository https://hectorespert.github.io/boinc-openwrt/arm_cortex-a9_vfpv3-d16/packages.adb boinc-upstream period-search binary-radio-pulsar-search
+
+          # armv7 Cortex-A15 (e.g. Netgear R7800, Linksys EA8500)
+          wget -P /etc/apk/keys/ https://hectorespert.github.io/boinc-openwrt/public-key.pem
+          apk add --repository https://hectorespert.github.io/boinc-openwrt/arm_cortex-a15_neon-vfpv4/packages.adb boinc-upstream period-search binary-radio-pulsar-search
+
           # x86_64 (e.g. PC/server)
           wget -P /etc/apk/keys/ https://hectorespert.github.io/boinc-openwrt/public-key.pem
           apk add --repository https://hectorespert.github.io/boinc-openwrt/x86_64/packages.adb boinc-upstream period-search binary-radio-pulsar-search
-
-          # mipsel (e.g. many home routers)
-          wget -P /etc/apk/keys/ https://hectorespert.github.io/boinc-openwrt/public-key.pem
-          apk add --repository https://hectorespert.github.io/boinc-openwrt/mipsel_24kc/packages.adb boinc-upstream period-search
-
-          # bmips/mips32 (e.g. Broadcom MIPS routers)
-          wget -P /etc/apk/keys/ https://hectorespert.github.io/boinc-openwrt/public-key.pem
-          apk add --repository https://hectorespert.github.io/boinc-openwrt/mips_mips32/packages.adb boinc-upstream period-search
 
           # riscv64 (e.g. generic RISC-V 64-bit device)
           wget -P /etc/apk/keys/ https://hectorespert.github.io/boinc-openwrt/public-key.pem
@@ -217,14 +230,17 @@ jobs:
           # aarch64 generic (e.g. generic ARM64 device)
           echo "https://hectorespert.github.io/boinc-openwrt/aarch64_generic/packages.adb" >> /etc/apk/repositories.d/customfeeds.list
 
+          # armv7 Cortex-A7 (e.g. Banana Pi R2, MediaTek MT7623)
+          echo "https://hectorespert.github.io/boinc-openwrt/arm_cortex-a7_neon-vfpv4/packages.adb" >> /etc/apk/repositories.d/customfeeds.list
+
+          # armv7 Cortex-A9 (e.g. Turris Omnia, Linksys WRT1900AC)
+          echo "https://hectorespert.github.io/boinc-openwrt/arm_cortex-a9_vfpv3-d16/packages.adb" >> /etc/apk/repositories.d/customfeeds.list
+
+          # armv7 Cortex-A15 (e.g. Netgear R7800, Linksys EA8500)
+          echo "https://hectorespert.github.io/boinc-openwrt/arm_cortex-a15_neon-vfpv4/packages.adb" >> /etc/apk/repositories.d/customfeeds.list
+
           # x86_64 (e.g. PC/server)
           echo "https://hectorespert.github.io/boinc-openwrt/x86_64/packages.adb" >> /etc/apk/repositories.d/customfeeds.list
-
-          # mipsel (e.g. many home routers)
-          echo "https://hectorespert.github.io/boinc-openwrt/mipsel_24kc/packages.adb" >> /etc/apk/repositories.d/customfeeds.list
-
-          # bmips/mips32 (e.g. Broadcom MIPS routers)
-          echo "https://hectorespert.github.io/boinc-openwrt/mips_mips32/packages.adb" >> /etc/apk/repositories.d/customfeeds.list
 
           # riscv64 (e.g. generic RISC-V 64-bit device)
           echo "https://hectorespert.github.io/boinc-openwrt/riscv64_generic/packages.adb" >> /etc/apk/repositories.d/customfeeds.list</pre>

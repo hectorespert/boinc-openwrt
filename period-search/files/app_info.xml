@@ -8,7 +8,7 @@
 </file>
 <app_version>
     <app_name>period_search</app_name>
-    <version_num>10220</version_num>
+    <version_num>10222</version_num>
     <api_version>@BOINC_API_VERSION@</api_version>
     <file_ref>
         <file_name>period_search_openwrt_aarch64</file_name>

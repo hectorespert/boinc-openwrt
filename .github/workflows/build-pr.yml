@@ -22,9 +22,10 @@ jobs:
           - aarch64_cortex-a72
           - aarch64_cortex-a76
           - aarch64_generic
+          - arm_cortex-a7_neon-vfpv4
+          - arm_cortex-a9_vfpv3-d16
+          - arm_cortex-a15_neon-vfpv4
           - x86_64
-          - mipsel_24kc
-          - mips_mips32
           - riscv64_generic
 
     steps:

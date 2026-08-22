@@ -16,10 +16,21 @@ Custom [OpenWrt](https://openwrt.org/) package repository providing [BOINC](http
 | `aarch64_cortex-a72` | Raspberry Pi 4 with OpenWrt |
 | `aarch64_cortex-a76` | Raspberry Pi 5 with OpenWrt |
 | `aarch64_generic` | Generic ARM64 devices |
+| `arm_cortex-a7_neon-vfpv4` | Banana Pi R2, MediaTek MT7623 |
+| `arm_cortex-a9_vfpv3-d16` | Turris Omnia, Linksys WRT1900AC |
+| `arm_cortex-a15_neon-vfpv4` | Netgear R7800, Linksys EA8500 |
 | `x86_64` | PC / server |
-| `mipsel_24kc` | Many home routers |
-| `mips_mips32` | Broadcom MIPS routers |
 | `riscv64_generic` | Generic RISC-V 64-bit devices |
+
+MIPS architectures are deliberately not built. Neither `mipsel_24kc` nor
+`mips_mips32` has an FPU (24K**c**, not 24K**f**), so OpenWrt builds them
+soft-float and every floating-point operation is emulated in software. The
+science applications are double-precision bound, so a workunit would never
+finish inside its deadline.
+
+The 32-bit ARM architectures run the science applications with hardware
+floating point but without SIMD: the vector paths use AArch64-only intrinsics
+(`float64x2_t`), and armv7 NEON has no double precision.
 
 ## Usage
 
