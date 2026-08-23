@@ -5,7 +5,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=period-search
 PKG_VERSION:=20260814
-PKG_RELEASE:=1
+PKG_RELEASE:=2
 
 PKG_SOURCE:=dev.tar.gz
 PKG_SOURCE_URL:=https://github.com/AsteroidsAtHome/PeriodSearch/archive/refs/heads
