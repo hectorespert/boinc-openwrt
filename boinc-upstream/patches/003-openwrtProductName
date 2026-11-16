@@ -1,6 +1,6 @@
 --- a/client/hostinfo_unix.cpp
 +++ b/client/hostinfo_unix.cpp
-@@ -734,6 +734,23 @@ static void parse_cpuinfo_linux(HOST_INFO& host) {
+@@ -734,6 +734,23 @@ static void parse_cpuinfo_linux(HOST_INF
      safe_strcpy(host.p_model, model_buf);
      fclose(f);
  }
@@ -24,7 +24,7 @@
  #endif  // LINUX_LIKE_SYSTEM
  #ifdef __FreeBSD__
  #if defined(__i386__) || defined(__amd64__)
-@@ -1413,6 +1430,7 @@ bool HOST_INFO::get_docker_compose_version(){
+@@ -1413,6 +1430,7 @@ bool HOST_INFO::get_docker_compose_versi
  int HOST_INFO::get_cpu_info() {
  #if LINUX_LIKE_SYSTEM
      parse_cpuinfo_linux(*this);
