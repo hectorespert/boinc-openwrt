@@ -86,8 +86,13 @@ against, so changing it changes which work units the client is offered.
 
 - `boinc-upstream`: git source; `PKG_SOURCE_VERSION` is derived from `PKG_VERSION`
   (`client_release/<major.minor>/<full>`), and `PKG_MIRROR_HASH` must be updated with it.
-- `period-search`: a *branch snapshot* tarball (`dev.tar.gz`), so `PKG_HASH` changes whenever
-  upstream pushes; `PKG_VERSION` is a date stamp and `PKG_BUILD_DIR` is pinned to `PeriodSearch-dev`.
+- `period-search`: pinned to a commit of upstream's `dev` branch. `PKG_SOURCE_VERSION` is the full
+  commit SHA, fetched as a codeload tarball (`.../tar.gz/<sha>?`, the trailing `?` stops download.pl
+  appending the file name), and `PKG_BUILD_DIR` is `PeriodSearch-<sha>`, the tarball's root dir.
+  `PKG_VERSION` is the commit date. To bump: take the latest `dev` SHA, update `PKG_HASH`, and diff
+  upstream's `Makefile_OpenWRT_aarch64` / `Makefile` source lists against `Build/Compile` (new
+  sources such as `benchmark.cpp` or `*_sve.cpp` must be added by hand), and check `version_num`
+  in `app_info.xml`.
 - `binary-radio-pulsar-search`: `brp-src-release.zip` from einsteinathome.org, unpacked by a custom
   `Build/Prepare` (the zip has no single root dir). That same hook injects
   [erp_git_version.h](binary-radio-pulsar-search/files/erp_git_version.h) (upstream generates it from

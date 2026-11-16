@@ -4,13 +4,14 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=period-search
-PKG_VERSION:=20260814
-PKG_RELEASE:=2
+PKG_VERSION:=20261021
+PKG_RELEASE:=1
 
-PKG_SOURCE:=dev.tar.gz
-PKG_SOURCE_URL:=https://github.com/AsteroidsAtHome/PeriodSearch/archive/refs/heads
-PKG_HASH:=534202a0c6bbfa739f806c0df6b36b37d7f9dbbfb5ce8bb97a2894bd16d8d7b6
-PKG_BUILD_DIR:=$(BUILD_DIR)/PeriodSearch-dev
+PKG_SOURCE_VERSION:=f4f138d87ca30a2ed7b4ebe89f06e85b4aa8c78c
+PKG_SOURCE:=PeriodSearch-$(PKG_SOURCE_VERSION).tar.gz
+PKG_SOURCE_URL:=https://codeload.github.com/AsteroidsAtHome/PeriodSearch/tar.gz/$(PKG_SOURCE_VERSION)?
+PKG_HASH:=ece7e882ff70173b5a8ce976ad6546b6340789d0aaa0481a32455fefe1c4bdad
+PKG_BUILD_DIR:=$(BUILD_DIR)/PeriodSearch-$(PKG_SOURCE_VERSION)
 
 PKG_LICENSE:=GPL-3.0-or-later
 PKG_LICENSE_FILES:=LICENSE
@@ -30,7 +31,7 @@ endef
 
 define Package/period-search/description
 	Builds the OpenWrt Period Search executable from Asteroids@home
-	dev branch snapshot and installs files for anonymous-platform usage in BOINC.
+	a pinned dev branch commit and installs files for anonymous-platform usage in BOINC.
 endef
 
 define Build/Configure
@@ -72,7 +73,13 @@ define Build/Compile
 			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/systeminfo.cpp \
 			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/trifac.cpp \
 			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/VersionInfo.cpp \
+			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/benchmark.cpp \
 			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/period_search_BOINC.cpp \
+			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/bright_sve.cpp \
+			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/conv_sve.cpp \
+			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/curv_sve.cpp \
+			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/gauss_errc_sve.cpp \
+			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/mrqcof_sve.cpp \
 			$(PKG_BUILD_DIR)/period_search_common/arrayHelpers.cpp \
 			$(PKG_BUILD_DIR)/period_search_common/dot_product.cpp \
 			$(PKG_BUILD_DIR)/period_search_common/LcHelpers.cpp \
@@ -133,7 +140,13 @@ define Build/Compile
 			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/systeminfo.cpp \
 			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/trifac.cpp \
 			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/VersionInfo.cpp \
+			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/benchmark.cpp \
 			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/period_search_BOINC.cpp \
+			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/bright_sve.cpp \
+			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/conv_sve.cpp \
+			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/curv_sve.cpp \
+			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/gauss_errc_sve.cpp \
+			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/mrqcof_sve.cpp \
 			$(PKG_BUILD_DIR)/period_search_common/arrayHelpers.cpp \
 			$(PKG_BUILD_DIR)/period_search_common/dot_product.cpp \
 			$(PKG_BUILD_DIR)/period_search_common/LcHelpers.cpp \
@@ -169,6 +182,7 @@ define Build/Compile
 			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/systeminfo.cpp \
 			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/trifac.cpp \
 			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/VersionInfo.cpp \
+			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/benchmark.cpp \
 			$(PKG_BUILD_DIR)/period_search_optimization_simd/period_search/period_search_BOINC.cpp \
 			$(PKG_BUILD_DIR)/period_search_common/arrayHelpers.cpp \
 			$(PKG_BUILD_DIR)/period_search_common/dot_product.cpp \
