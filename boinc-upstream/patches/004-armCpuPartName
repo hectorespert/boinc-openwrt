@@ -1,0 +1,51 @@
+--- a/client/hostinfo_unix.cpp
++++ b/client/hostinfo_unix.cpp
+@@ -467,6 +467,35 @@ static void parse_meminfo_linux(HOST_INF
+     fclose(f);
+ }
+ 
++#if defined(__aarch64__) || defined(__arm__)
++// arm64 kernels give no "model name" in /proc/cpuinfo,
++// only the MIDR fields "CPU implementer" and "CPU part".
++// Map them to a core name.
++// PoC: only the cores of the test devices are listed.
++//
++struct ARM_CPU_PART {
++    unsigned long implementer;
++    unsigned long part;
++    const char* name;
++};
++
++static const ARM_CPU_PART arm_cpu_parts[] = {
++    {0x41, 0xd03, "Cortex-A53"},
++};
++
++static const char* arm_cpu_part_name(const char* implementer, const char* part) {
++    if (!strlen(implementer) || !strlen(part)) return NULL;
++    unsigned long impl = strtoul(implementer, NULL, 0);
++    unsigned long p = strtoul(part, NULL, 0);
++    for (const ARM_CPU_PART& cp : arm_cpu_parts) {
++        if (cp.implementer == impl && cp.part == p) {
++            return cp.name;
++        }
++    }
++    return NULL;
++}
++#endif
++
+ // Unfortunately the format of /proc/cpuinfo is not standardized.
+ // See http://people.nl.linux.org/~hch/cpuinfo/ for some examples.
+ //
+@@ -702,6 +731,12 @@ static void parse_cpuinfo_linux(HOST_INF
+         safe_strcat(model_buf, "]");
+     }
+ #else
++    if (!model_found) {
++        const char* name = arm_cpu_part_name(implementer, cpu_part);
++        if (name) {
++            safe_strcpy(model_buf, name);
++        }
++    }
+     if (model_info_found) {
+         safe_strcat(model_buf, " [");
+         if (strlen(implementer)>0) {
