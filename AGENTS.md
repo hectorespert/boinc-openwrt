@@ -80,7 +80,10 @@ one avoids linking freetype when the manager is disabled, one makes the client h
 `HOSTTYPE`/`HOSTTYPEALT` platform names passed via `--with-boinc-platform` /
 `--with-boinc-alt-platform` instead of guessing. The alt-platform string
 (`$(ARCH)-$(BOARD)-$(DEVICE_TYPE)-openwrt-$(TARGET_SUFFIX)`) is what BOINC projects match work
-against, so changing it changes which work units the client is offered.
+against, so changing it changes which work units the client is offered. A third, experimental one
+(`003-openwrtProductName`) reports OpenWrt's `/tmp/sysinfo/model` (what LuCI shows as "Model") as the
+host's `product_name`; the init script mounts that file into the jail for it. It is a test patch
+meant to be proposed upstream to BOINC once validated on devices.
 
 ## Version bumps
 

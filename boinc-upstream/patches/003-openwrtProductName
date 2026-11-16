@@ -1,0 +1,34 @@
+--- a/client/hostinfo_unix.cpp
++++ b/client/hostinfo_unix.cpp
+@@ -734,6 +734,23 @@ static void parse_cpuinfo_linux(HOST_INF
+     safe_strcpy(host.p_model, model_buf);
+     fclose(f);
+ }
++
++// OpenWrt writes the device model (from device tree, DMI, etc.)
++// to /tmp/sysinfo/model at boot; LuCI shows it as "Model".
++// If present, prefer it over the "Hardware" line of /proc/cpuinfo.
++//
++static void get_openwrt_model(HOST_INFO& host) {
++    char buf[256];
++    FILE* f = fopen("/tmp/sysinfo/model", "r");
++    if (!f) return;
++    if (fgets(buf, sizeof(buf), f)) {
++        strip_whitespace(buf);
++        if (strlen(buf)) {
++            safe_strcpy(host.product_name, buf);
++        }
++    }
++    fclose(f);
++}
+ #endif  // LINUX_LIKE_SYSTEM
+ #ifdef __FreeBSD__
+ #if defined(__i386__) || defined(__amd64__)
+@@ -1413,6 +1430,7 @@ bool HOST_INFO::get_docker_compose_versi
+ int HOST_INFO::get_cpu_info() {
+ #if LINUX_LIKE_SYSTEM
+     parse_cpuinfo_linux(*this);
++    get_openwrt_model(*this);
+ #elif defined( __APPLE__)
+     get_cpu_info_mac(*this);
+ #elif defined(__EMX__)
