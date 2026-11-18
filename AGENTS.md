@@ -84,8 +84,9 @@ against, so changing it changes which work units the client is offered. A third,
 (`003-openwrtProductName`) reports OpenWrt's `/tmp/sysinfo/model` (what LuCI shows as "Model") as the
 host's `product_name`; the init script mounts that file into the jail for it, and the client only
 reads it if it is a regular file owned by root (no symlink or FIFO). A fourth one
-(`004-armCpuPartName`) puts an ARM core name (from a `CPU implementer`/`CPU part` table, so far only
-Cortex-A53) at the start of `p_model`, since arm64 kernels give no `model name`. Both are test
+(`004-armCpuPartName`) puts an ARM core name (from a `CPU implementer`/`CPU part` table of the
+common Cortex-A and Neoverse-N1 cores; with big.LITTLE, the first CPU's) at the start of `p_model`,
+since arm64 kernels give no `model name`. Both are test
 patches meant to be proposed upstream to BOINC once validated on devices.
 
 ## Version bumps

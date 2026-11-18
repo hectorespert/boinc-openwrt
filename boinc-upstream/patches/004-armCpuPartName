@@ -1,14 +1,21 @@
---- a/client/hostinfo_unix.cpp
-+++ b/client/hostinfo_unix.cpp
-@@ -467,6 +467,35 @@ static void parse_meminfo_linux(HOST_INF
-     fclose(f);
+--- a/client/hostinfo_linux.cpp
++++ b/client/hostinfo_linux.cpp
+@@ -26,6 +26,7 @@
+ #else
+ #include "config.h"
+ #include <cstdio>
++#include <cstdlib>
+ #include <cstring>
+ #if HAVE_UNISTD_H
+ #include <unistd.h>
+@@ -237,6 +238,48 @@ bool HOST_INFO::parse_openwrt_model(
+     return true;
  }
  
-+#if defined(__aarch64__) || defined(__arm__)
-+// arm64 kernels give no "model name" in /proc/cpuinfo,
-+// only the MIDR fields "CPU implementer" and "CPU part".
-+// Map them to a core name.
-+// PoC: only the cores of the test devices are listed.
++// ARM cores by the MIDR fields of /proc/cpuinfo
++// ("CPU implementer" and "CPU part").
++// Only cores seen on hosts that report no "model name";
++// 32-bit kernels give one.
 +//
 +struct ARM_CPU_PART {
 +    unsigned long implementer;
@@ -18,12 +25,27 @@
 +
 +static const ARM_CPU_PART arm_cpu_parts[] = {
 +    {0x41, 0xd03, "Cortex-A53"},
++    {0x41, 0xd05, "Cortex-A55"},
++    {0x41, 0xd07, "Cortex-A57"},
++    {0x41, 0xd08, "Cortex-A72"},
++    {0x41, 0xd0b, "Cortex-A76"},
++    {0x41, 0xd0c, "Neoverse-N1"},
++    {0x41, 0xd42, "Cortex-A78AE"},
++    {0x41, 0xd80, "Cortex-A520"},
++    {0x41, 0xd81, "Cortex-A720"},
++    {0x41, 0xd87, "Cortex-A725"},
 +};
 +
-+static const char* arm_cpu_part_name(const char* implementer, const char* part) {
-+    if (!strlen(implementer) || !strlen(part)) return NULL;
-+    unsigned long impl = strtoul(implementer, NULL, 0);
-+    unsigned long p = strtoul(part, NULL, 0);
++// return the core name, or NULL if unknown
++//
++const char* HOST_INFO::arm_cpu_part_name(
++    const char* implementer, const char* part
++) {
++    if (!implementer || !part) return NULL;
++    char *end1, *end2;
++    unsigned long impl = strtoul(implementer, &end1, 16);
++    unsigned long p = strtoul(part, &end2, 16);
++    if (end1 == implementer || *end1 || end2 == part || *end2) return NULL;
 +    for (const ARM_CPU_PART& cp : arm_cpu_parts) {
 +        if (cp.implementer == impl && cp.part == p) {
 +            return cp.name;
@@ -31,17 +53,22 @@
 +    }
 +    return NULL;
 +}
-+#endif
 +
- // Unfortunately the format of /proc/cpuinfo is not standardized.
- // See http://people.nl.linux.org/~hch/cpuinfo/ for some examples.
- //
-@@ -702,6 +731,12 @@ static void parse_cpuinfo_linux(HOST_INF
+ int is_filesystem_remote(const char* path, bool &result) {
+     char cmd[256], buf[256];
+     vector<string> out;
+--- a/client/hostinfo_unix.cpp
++++ b/client/hostinfo_unix.cpp
+@@ -702,6 +702,16 @@ static void parse_cpuinfo_linux(HOST_INF
          safe_strcat(model_buf, "]");
      }
  #else
++    // arm64 kernels give no "model name", only the MIDR fields;
++    // name the core from them.
++    // With mixed cores (big.LITTLE) this is the first CPU's.
++    //
 +    if (!model_found) {
-+        const char* name = arm_cpu_part_name(implementer, cpu_part);
++        const char* name = HOST_INFO::arm_cpu_part_name(implementer, cpu_part);
 +        if (name) {
 +            safe_strcpy(model_buf, name);
 +        }
@@ -49,3 +76,15 @@
      if (model_info_found) {
          safe_strcat(model_buf, " [");
          if (strlen(implementer)>0) {
+--- a/lib/hostinfo.h
++++ b/lib/hostinfo.h
+@@ -169,6 +169,9 @@ public:
+     static bool parse_openwrt_model(
+         FILE* file, char* model, const int model_size
+     );
++    static const char* arm_cpu_part_name(
++        const char* implementer, const char* part
++    );
+     static bool get_docker_version_string(
+         DOCKER_TYPE type, const char* raw, std::string& version
+     );

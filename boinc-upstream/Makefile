@@ -8,7 +8,7 @@ include $(TOPDIR)/rules.mk
 PKG_NAME:=boinc-upstream
 PKG_VERSION:=8.2.15
 PKG_VERSION_SHORT:=$(shell echo $(PKG_VERSION)| cut -f1,2 -d.)
-PKG_RELEASE:=4
+PKG_RELEASE:=5
 
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/BOINC/boinc
